@@ -258,7 +258,7 @@
     .croissant-contact-shadow {
       position: absolute;
       left: 50%;
-      bottom: clamp(96px, 12.8svh, 134px);
+      bottom: clamp(60px, 8.5svh, 92px);
       z-index: 21;
       width: min(46vw, 640px);
       height: clamp(44px, 6.5svh, 66px);
@@ -1289,7 +1289,7 @@
 
       .roti-mound.roti-mobile-left {
         left: -2vw;
-        bottom: 19.5svh;
+        bottom: 16.5svh;
         width: 56vw;
         max-height: 58svh;
         object-fit: contain;
@@ -1298,7 +1298,7 @@
 
       .roti-mound.roti-mobile-right {
         right: -2vw;
-        bottom: 19.5svh;
+        bottom: 16.5svh;
         width: 58vw;
         max-height: 55svh;
         object-fit: contain;
@@ -1308,7 +1308,7 @@
       .croissant-contact-shadow {
         width: 88vw;
         height: 46px;
-        bottom: 13.8svh;
+        bottom: 10.5svh;
       }
 
       .kitchen-table-pc {
@@ -1958,7 +1958,7 @@
         camera.position.set(0, 0.04, camZ);
         const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
         // PC & Mobile: plant Giant Croissant directly down onto the walnut wooden tabletop (not floating!)
-        const pivotY = aspect < 0.85 ? -halfWorldH * 0.49 : -halfWorldH * 0.31;
+        const pivotY = aspect < 0.85 ? -halfWorldH * 0.54 : -halfWorldH * 0.48;
         pivot.position.set(0, pivotY, 0);
         measureTitleEndpoints();
       }
@@ -2695,7 +2695,6 @@
           };
 
           const textTargets = Array.from(document.querySelectorAll([
-            "#tearCueLabel",
             ".hero-lead",
             ".section-title",
             ".section-sub",
