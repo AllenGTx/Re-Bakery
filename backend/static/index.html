@@ -295,9 +295,17 @@
 
     .roti-mound.roti-v-right {
       right: -0.4vw;
-      width: min(50vw, 80svh);
+      width: min(58vw, 92svh);
       bottom: clamp(134px, 18.2svh, 178px);
       transform: translate3d(0, 0, 0);
+    }
+
+    .roti-mound.roti-center-stand {
+      left: 50%;
+      bottom: clamp(140px, 18.8svh, 185px);
+      width: min(28vw, 440px);
+      transform: translate3d(-50%, 0, 0);
+      z-index: 15;
     }
 
     /* Dedicated Mobile Portrait Tall V-Wings (hidden on PC) */
@@ -1507,8 +1515,9 @@
           <div class="curtain-bg" id="curtainBg"></div>
           <img class="kitchen-table-layer kitchen-table-pc" id="kitchenTablePc" src="/static/assets/intro/kitchen_table_pc.webp?v=6" alt="" width="1600" height="540" decoding="async" />
           <img class="kitchen-table-layer kitchen-table-mobile" id="kitchenTableMobile" src="/static/assets/intro/kitchen_table.webp?v=2" alt="" width="1600" height="554" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.webp?v=7" alt="" width="1048" height="718" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.webp?v=7" alt="" width="883" height="658" decoding="async" />
+          <img class="roti-mound roti-pc-wing roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.webp?v=8" alt="" width="1048" height="718" decoding="async" />
+          <img class="roti-mound roti-pc-wing roti-center-stand" id="rotiCenterStand" src="/static/assets/intro/roti_center_stand.webp?v=1" alt="" width="540" height="460" decoding="async" />
+          <img class="roti-mound roti-pc-wing roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.webp?v=9" alt="" width="1150" height="740" decoding="async" />
           <img class="roti-mound roti-mobile-wing roti-mobile-left" id="rotiLeftMobile" src="/static/assets/intro/roti_mobile_left.webp?v=2" alt="" width="559" height="1080" decoding="async" />
           <img class="roti-mound roti-mobile-wing roti-mobile-right" id="rotiRightMobile" src="/static/assets/intro/roti_mobile_right.webp?v=2" alt="" width="652" height="1020" decoding="async" />
           <div class="croissant-contact-shadow" id="croissantShadow"></div>
@@ -1786,6 +1795,7 @@
     const croissantShadow = document.getElementById("croissantShadow");
     const heroCanvas = document.getElementById("croissantCanvas");
     const rotiLeftFront = document.getElementById("rotiLeftFront");
+    const rotiCenterStand = document.getElementById("rotiCenterStand");
     const rotiRightFront = document.getElementById("rotiRightFront");
     const rotiLeftMobile = document.getElementById("rotiLeftMobile");
     const rotiRightMobile = document.getElementById("rotiRightMobile");
@@ -2112,6 +2122,11 @@
           if (rotiRightFront) {
             rotiRightFront.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 5).toFixed(2)}deg)`;
             rotiRightFront.style.opacity = sideAlpha.toFixed(3);
+          }
+          if (rotiCenterStand) {
+            const cy = sideEase * 180;
+            rotiCenterStand.style.transform = `translate3d(-50%, ${cy.toFixed(1)}px, 0)`;
+            rotiCenterStand.style.opacity = sideAlpha.toFixed(3);
           }
         }
 
