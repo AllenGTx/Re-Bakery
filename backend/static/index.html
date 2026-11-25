@@ -239,35 +239,39 @@
       bottom: 0;
       z-index: 14;
       width: 100vw;
-      min-width: 1120px;
-      height: clamp(195px, 27.5svh, 265px);
+      min-width: 1180px;
+      height: clamp(275px, 36.5svh, 355px);
       object-fit: cover;
       object-position: center bottom;
       transform: translate3d(-50%, 0, 0);
       pointer-events: none;
-      opacity: 0.98;
-      filter: brightness(0.90) contrast(1.04);
+      opacity: 0.99;
+      filter: brightness(0.92) contrast(1.04);
       will-change: transform, opacity;
+    }
+
+    .kitchen-table-mobile {
+      display: none;
     }
 
     /* Grounding contact shadow directly beneath the Giant Croissant onto the wooden workbench */
     .croissant-contact-shadow {
       position: absolute;
       left: 50%;
-      bottom: clamp(128px, 18.4svh, 178px);
+      bottom: clamp(96px, 12.8svh, 134px);
       z-index: 21;
-      width: min(56vw, 680px);
-      height: clamp(42px, 6.8svh, 66px);
+      width: min(46vw, 640px);
+      height: clamp(44px, 6.5svh, 66px);
       transform: translate3d(-50%, 0, 0);
       border-radius: 50%;
       background: radial-gradient(
         ellipse at center,
-        rgba(5, 3, 1, 0.92) 0%,
-        rgba(8, 5, 2, 0.68) 46%,
-        rgba(8, 5, 2, 0.22) 74%,
+        rgba(4, 2, 1, 0.95) 0%,
+        rgba(7, 4, 2, 0.76) 48%,
+        rgba(8, 5, 2, 0.28) 76%,
         transparent 100%
       );
-      filter: blur(10px);
+      filter: blur(9px);
       pointer-events: none;
       will-change: transform, opacity;
     }
@@ -277,22 +281,22 @@
       z-index: 17;
       height: auto;
       pointer-events: none;
-      filter: brightness(0.92) contrast(1.03) drop-shadow(0 16px 20px rgba(5, 3, 1, 0.85));
+      filter: brightness(0.93) contrast(1.03) drop-shadow(0 14px 18px rgba(5, 3, 1, 0.82));
       will-change: transform, opacity;
     }
 
-    /* PC Photorealistic V-Wings: anchored on open back walnut wood completely above linen & rolling pin */
+    /* PC Photorealistic V-Wings: flush mojok at outer walls, anchored on open back wood completely above foreground tools */
     .roti-mound.roti-v-left {
-      left: 0;
-      width: min(50vw, 76svh);
-      bottom: clamp(138px, 19svh, 182px);
+      left: -0.4vw;
+      width: min(55vw, 88svh);
+      bottom: clamp(134px, 18.2svh, 178px);
       transform: translate3d(0, 0, 0);
     }
 
     .roti-mound.roti-v-right {
-      right: 0;
-      width: min(48vw, 73svh);
-      bottom: clamp(132px, 18.2svh, 174px);
+      right: -0.4vw;
+      width: min(50vw, 80svh);
+      bottom: clamp(134px, 18.2svh, 178px);
       transform: translate3d(0, 0, 0);
     }
 
@@ -1304,10 +1308,15 @@
       .croissant-contact-shadow {
         width: 88vw;
         height: 46px;
-        bottom: 17.5svh;
+        bottom: 13.8svh;
       }
 
-      .kitchen-table-layer {
+      .kitchen-table-pc {
+        display: none;
+      }
+
+      .kitchen-table-mobile {
+        display: block;
         min-width: 0;
         width: 118vw;
         height: 26svh;
@@ -1496,9 +1505,10 @@
         <!-- Foreground Curtain: Wooden Kitchen Workbench + Photorealistic V-Wings + Giant 3D Croissant -->
         <div class="curtain-3d" id="curtain3d" aria-hidden="true">
           <div class="curtain-bg" id="curtainBg"></div>
-          <img class="kitchen-table-layer" id="kitchenTable" src="/static/assets/intro/kitchen_table.webp?v=2" alt="" width="1600" height="554" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.webp?v=2" alt="" width="1191" height="820" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.webp?v=2" alt="" width="1112" height="780" decoding="async" />
+          <img class="kitchen-table-layer kitchen-table-pc" id="kitchenTablePc" src="/static/assets/intro/kitchen_table_pc.webp?v=6" alt="" width="1600" height="540" decoding="async" />
+          <img class="kitchen-table-layer kitchen-table-mobile" id="kitchenTableMobile" src="/static/assets/intro/kitchen_table.webp?v=2" alt="" width="1600" height="554" decoding="async" />
+          <img class="roti-mound roti-pc-wing roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.webp?v=7" alt="" width="1048" height="718" decoding="async" />
+          <img class="roti-mound roti-pc-wing roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.webp?v=7" alt="" width="883" height="658" decoding="async" />
           <img class="roti-mound roti-mobile-wing roti-mobile-left" id="rotiLeftMobile" src="/static/assets/intro/roti_mobile_left.webp?v=2" alt="" width="559" height="1080" decoding="async" />
           <img class="roti-mound roti-mobile-wing roti-mobile-right" id="rotiRightMobile" src="/static/assets/intro/roti_mobile_right.webp?v=2" alt="" width="652" height="1020" decoding="async" />
           <div class="croissant-contact-shadow" id="croissantShadow"></div>
@@ -1771,7 +1781,8 @@
     const heroSticky = document.getElementById("heroSticky");
     const curtain3d = document.getElementById("curtain3d");
     const curtainBg = document.getElementById("curtainBg");
-    const kitchenTable = document.getElementById("kitchenTable");
+    const kitchenTablePc = document.getElementById("kitchenTablePc");
+    const kitchenTableMobile = document.getElementById("kitchenTableMobile");
     const croissantShadow = document.getElementById("croissantShadow");
     const heroCanvas = document.getElementById("croissantCanvas");
     const rotiLeftFront = document.getElementById("rotiLeftFront");
@@ -1941,13 +1952,13 @@
 
         const aspect = w / Math.max(1, h);
         const vFovRad = (camera.fov * Math.PI) / 180;
-        const desiredWorldWidth = aspect < 0.85 ? 4.10 : 5.30;
+        const desiredWorldWidth = aspect < 0.85 ? 4.10 : 7.05;
         const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
-        const camZ = Math.max(6.45, distForWidth);
+        const camZ = Math.max(8.25, distForWidth);
         camera.position.set(0, 0.04, camZ);
         const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
-        // PC: rest above foreground rolling pin/whisk; Mobile: rest down in Yellow Dome directly on walnut table
-        const pivotY = aspect < 0.85 ? -halfWorldH * 0.39 : -0.04;
+        // PC & Mobile: plant Giant Croissant directly down onto the walnut wooden tabletop (not floating!)
+        const pivotY = aspect < 0.85 ? -halfWorldH * 0.49 : -halfWorldH * 0.31;
         pivot.position.set(0, pivotY, 0);
         measureTitleEndpoints();
       }
@@ -2065,10 +2076,11 @@
         const sideAlpha = Math.max(0, 1 - sideExitT * 1.15);
         const isMobileView = window.innerWidth <= 768;
 
-        if (kitchenTable) {
-          const tableDrop = sideEase * (isMobileView ? 150 : 210);
-          kitchenTable.style.transform = `translate3d(-50%, ${tableDrop.toFixed(1)}px, 0)`;
-          kitchenTable.style.opacity = (sideAlpha * 0.96).toFixed(3);
+        const activeTable = isMobileView ? kitchenTableMobile : kitchenTablePc;
+        if (activeTable) {
+          const tableDrop = sideEase * (isMobileView ? 150 : 220);
+          activeTable.style.transform = `translate3d(-50%, ${tableDrop.toFixed(1)}px, 0)`;
+          activeTable.style.opacity = (sideAlpha * 0.99).toFixed(3);
         }
 
         if (croissantShadow) {
