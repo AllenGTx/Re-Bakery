@@ -258,10 +258,10 @@
     .croissant-contact-shadow {
       position: absolute;
       left: 50%;
-      bottom: clamp(60px, 8.5svh, 92px);
+      bottom: clamp(100px, 13.5svh, 140px);
       z-index: 21;
-      width: min(46vw, 640px);
-      height: clamp(44px, 6.5svh, 66px);
+      width: min(42vw, 560px);
+      height: clamp(38px, 5.5svh, 54px);
       transform: translate3d(-50%, 0, 0);
       border-radius: 50%;
       background: radial-gradient(
@@ -311,6 +311,37 @@
     /* Dedicated Mobile Portrait Tall V-Wings (hidden on PC) */
     .roti-mound.roti-mobile-wing {
       display: none;
+    }
+
+    /* Unified Photorealistic Bakery Backdrop (Table + Mounds + Stands) */
+    .splash-unified-backdrop {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 100vw;
+      min-width: 1140px;
+      max-width: 1920px;
+      height: 94svh;
+      max-height: 1080px;
+      object-fit: contain;
+      object-position: center bottom;
+      transform: translate3d(-50%, 0, 0);
+      z-index: 16;
+      pointer-events: none;
+      filter: drop-shadow(0 18px 24px rgba(4, 2, 1, 0.90));
+      will-change: transform, opacity;
+      transition: opacity 220ms var(--ease-out);
+    }
+
+    @media (max-width: 768px) {
+      .splash-unified-backdrop {
+        width: 155vw;
+        min-width: 0;
+        max-width: none;
+        height: 75svh;
+        object-fit: cover;
+        object-position: center bottom;
+      }
     }
 
     #croissantCanvas {
@@ -1314,9 +1345,9 @@
       }
 
       .croissant-contact-shadow {
-        width: 88vw;
-        height: 46px;
-        bottom: 10.5svh;
+        width: 82vw;
+        height: 40px;
+        bottom: 14.5svh;
       }
 
       .kitchen-table-pc {
@@ -1513,13 +1544,7 @@
         <!-- Foreground Curtain: Wooden Kitchen Workbench + Photorealistic V-Wings + Giant 3D Croissant -->
         <div class="curtain-3d" id="curtain3d" aria-hidden="true">
           <div class="curtain-bg" id="curtainBg"></div>
-          <img class="kitchen-table-layer kitchen-table-pc" id="kitchenTablePc" src="/static/assets/intro/kitchen_table_pc.webp?v=6" alt="" width="1600" height="540" decoding="async" />
-          <img class="kitchen-table-layer kitchen-table-mobile" id="kitchenTableMobile" src="/static/assets/intro/kitchen_table.webp?v=2" alt="" width="1600" height="554" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.webp?v=8" alt="" width="1048" height="718" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-center-stand" id="rotiCenterStand" src="/static/assets/intro/roti_center_stand.webp?v=1" alt="" width="540" height="460" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.webp?v=9" alt="" width="1150" height="740" decoding="async" />
-          <img class="roti-mound roti-mobile-wing roti-mobile-left" id="rotiLeftMobile" src="/static/assets/intro/roti_mobile_left.webp?v=2" alt="" width="559" height="1080" decoding="async" />
-          <img class="roti-mound roti-mobile-wing roti-mobile-right" id="rotiRightMobile" src="/static/assets/intro/roti_mobile_right.webp?v=2" alt="" width="652" height="1020" decoding="async" />
+          <img class="splash-unified-backdrop" id="splashBackdrop" src="/static/assets/intro/splash_backdrop.webp?v=1" alt="" width="1920" height="1080" fetchpriority="high" decoding="async" />
           <div class="croissant-contact-shadow" id="croissantShadow"></div>
           <canvas id="croissantCanvas"></canvas>
           <div class="tear-cue" id="tearCue">
@@ -1790,15 +1815,9 @@
     const heroSticky = document.getElementById("heroSticky");
     const curtain3d = document.getElementById("curtain3d");
     const curtainBg = document.getElementById("curtainBg");
-    const kitchenTablePc = document.getElementById("kitchenTablePc");
-    const kitchenTableMobile = document.getElementById("kitchenTableMobile");
+    const splashBackdrop = document.getElementById("splashBackdrop");
     const croissantShadow = document.getElementById("croissantShadow");
     const heroCanvas = document.getElementById("croissantCanvas");
-    const rotiLeftFront = document.getElementById("rotiLeftFront");
-    const rotiCenterStand = document.getElementById("rotiCenterStand");
-    const rotiRightFront = document.getElementById("rotiRightFront");
-    const rotiLeftMobile = document.getElementById("rotiLeftMobile");
-    const rotiRightMobile = document.getElementById("rotiRightMobile");
     const flyingTitle = document.getElementById("flyingTitle");
     const heroTargetTitle = document.getElementById("heroTargetTitle");
     const tearCue = document.getElementById("tearCue");
@@ -1962,13 +1981,14 @@
 
         const aspect = w / Math.max(1, h);
         const vFovRad = (camera.fov * Math.PI) / 180;
-        const desiredWorldWidth = aspect < 0.85 ? 4.10 : 7.05;
+        // Croissant sizing: tuned so it sits harmoniously inside the central valley of the new bakery backdrop
+        const desiredWorldWidth = aspect < 0.85 ? 3.65 : 5.75;
         const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
-        const camZ = Math.max(8.25, distForWidth);
+        const camZ = Math.max(8.0, distForWidth);
         camera.position.set(0, 0.04, camZ);
         const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
-        // PC & Mobile: plant Giant Croissant directly down onto the walnut wooden tabletop (not floating!)
-        const pivotY = aspect < 0.85 ? -halfWorldH * 0.54 : -halfWorldH * 0.48;
+        // Position croissant firmly seated on the center wooden tabletop
+        const pivotY = aspect < 0.85 ? -halfWorldH * 0.44 : -halfWorldH * 0.35;
         pivot.position.set(0, pivotY, 0);
         measureTitleEndpoints();
       }
@@ -2086,48 +2106,19 @@
         const sideAlpha = Math.max(0, 1 - sideExitT * 1.15);
         const isMobileView = window.innerWidth <= 768;
 
-        const activeTable = isMobileView ? kitchenTableMobile : kitchenTablePc;
-        if (activeTable) {
-          const tableDrop = sideEase * (isMobileView ? 150 : 220);
-          activeTable.style.transform = `translate3d(-50%, ${tableDrop.toFixed(1)}px, 0)`;
-          activeTable.style.opacity = (sideAlpha * 0.99).toFixed(3);
+        // Splash animation: smooth slide downwards on scroll
+        if (splashBackdrop) {
+          const dropY = sideEase * (isMobileView ? 280 : 380) + curPtrY * 6 * (1 - sideExitT);
+          splashBackdrop.style.transform = `translate3d(-50%, ${dropY.toFixed(1)}px, 0)`;
+          splashBackdrop.style.opacity = sideAlpha.toFixed(3);
         }
 
         if (croissantShadow) {
           const shadowAlpha = Math.max(0, 1 - tearRaw * 2.2);
           const shadowScale = 1 + tearEase * 0.25;
-          croissantShadow.style.transform = `translate3d(-50%, 0, 0) scale(${shadowScale.toFixed(3)})`;
+          const shadowDrop = sideEase * 220;
+          croissantShadow.style.transform = `translate3d(-50%, ${shadowDrop.toFixed(1)}px, 0) scale(${shadowScale.toFixed(3)})`;
           croissantShadow.style.opacity = shadowAlpha.toFixed(3);
-        }
-
-        const lx = -sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
-        const ly = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
-        const rx = sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
-        const ry = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
-
-        if (isMobileView) {
-          if (rotiLeftMobile) {
-            rotiLeftMobile.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${(-sideEase * 5).toFixed(2)}deg)`;
-            rotiLeftMobile.style.opacity = sideAlpha.toFixed(3);
-          }
-          if (rotiRightMobile) {
-            rotiRightMobile.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 5).toFixed(2)}deg)`;
-            rotiRightMobile.style.opacity = sideAlpha.toFixed(3);
-          }
-        } else {
-          if (rotiLeftFront) {
-            rotiLeftFront.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${(-sideEase * 5).toFixed(2)}deg)`;
-            rotiLeftFront.style.opacity = sideAlpha.toFixed(3);
-          }
-          if (rotiRightFront) {
-            rotiRightFront.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 5).toFixed(2)}deg)`;
-            rotiRightFront.style.opacity = sideAlpha.toFixed(3);
-          }
-          if (rotiCenterStand) {
-            const cy = sideEase * 180;
-            rotiCenterStand.style.transform = `translate3d(-50%, ${cy.toFixed(1)}px, 0)`;
-            rotiCenterStand.style.opacity = sideAlpha.toFixed(3);
-          }
         }
 
         if (flyingTitle && heroTargetTitle) {
