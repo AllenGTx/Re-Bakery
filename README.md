@@ -33,7 +33,7 @@ graph TD
     A[Browser Client / Web UI] -->|HTTP POST /api/predict| B(FastAPI Server)
     A -->|WebSocket/HTTP POST /api/predict-frame| B
     B --> C[inference.py - ONNX Runtime Engine]
-    C --> D[(rebakery.onnx - 19.1 MB)]
+    C --> D[(rebakery.int8.onnx - 28 MB)]
     C --> E[(labels.json)]
     D --> C
     C -->|JSON Top-1 & Top-3 + Latency| B
@@ -43,7 +43,7 @@ graph TD
 | Komponen | Teknologi | Deskripsi |
 |---|---|---|
 | **Deep Learning Backbone** | `EfficientNet-B0` | Transfer learning pre-trained, 2-phase training (Frozen -> Fine-tune top 30%). |
-| **Model Runtime** | `ONNX Runtime` | CPU-optimized inference (~30-50ms per frame). Model: `backend/models/rebakery.onnx` (19.1 MB). |
+| **Model Runtime** | `ONNX Runtime` | CPU inference memakai `rebakery.int8.onnx` (~28 MB); `rebakery.onnx` FP32 digunakan sebagai fallback lokal jika tersedia. |
 | **Akurasi Model** | **95.95% Test Acc** | Best validation accuracy: **98.61%**. |
 | **Backend Framework** | `FastAPI` (Python) | High-performance asynchronous API + Static file server. |
 | **Web Server** | `Uvicorn` | ASGI server running at port 8000. |
@@ -58,7 +58,8 @@ ComVis - ReBakery/
 │
 ├── backend/                              # Server & Machine Learning Backend
 │   ├── models/
-│   │   ├── rebakery.onnx                 # File bobot model ONNX (19.1 MB) [WAJIB ADA]
+│   │   ├── rebakery.int8.onnx            # Model kuantisasi untuk deployment (~28 MB) [WAJIB ADA]
+│   │   ├── rebakery.onnx                 # Model FP32 lokal (opsional; tidak disertakan di deployment)
 │   │   └── labels.json                   # Metadata 8 kelas, class_to_idx, & emoji
 │   ├── static/
 │   │   └── index.html                    # Frontend Web App (UI Warm Bakery + Motion)
@@ -66,6 +67,9 @@ ComVis - ReBakery/
 │   ├── inference.py                      # Engine inferensi ONNX & normalisasi ImageNet
 │   ├── main.py                           # Server FastAPI (endpoints /api/predict & /api/predict-frame)
 │   └── requirements.txt                  # Dependensi Python
+│
+├── frontend/
+│   └── Sample/                            # Foto contoh kelas yang disajikan aplikasi web
 │
 ├── Dataset/                              # Dataset gambar lokal (~469 raw images)
 │   ├── Baguette/
@@ -107,7 +111,7 @@ ComVis - ReBakery/
 
 ### Cara 1: Menggunakan Script Otomatis (Windows)
 1. Salin seluruh folder `ComVis - ReBakery` ke device baru.
-2. Pastikan file `backend/models/rebakery.onnx` dan `backend/models/labels.json` sudah ada.
+2. Pastikan file `backend/models/rebakery.int8.onnx` dan `backend/models/labels.json` sudah ada. Model FP32 `rebakery.onnx` dapat digunakan sebagai fallback lokal.
 3. **Klik dua kali file `run_web.bat`**.
    - Script akan otomatis mendeteksi Python.
    - Menginstall dependensi dari `backend/requirements.txt`.
@@ -252,7 +256,7 @@ Saat ini aplikasi berjalan di `localhost:8000`. Untuk dipublikasikan ke internet
 2. **Kamera Web tidak menyala**:
    - Jika dibuka di luar `localhost` (misal via IP LAN `http://192.168.x.x`), browser memblokir kamera karena bukan HTTPS. Jalankan di `localhost:8000` atau deploy dengan domain ber-HTTPS.
 3. **Error: `Model belum dimuat. Periksa folder backend/models/`**:
-   - Pastikan file `rebakery.onnx` dan `labels.json` berada di dalam folder `backend/models/`.
+   - Pastikan `rebakery.int8.onnx` atau `rebakery.onnx` dan `labels.json` berada di dalam folder `backend/models/`.
 
 ---
 *Dokumen ini dibuat otomatis sebagai panduan handoff resmi proyek Re:Bakery.*

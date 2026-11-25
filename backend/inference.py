@@ -13,7 +13,7 @@ CAMERA_CONFIDENCE_THRESHOLD = 40.0
 class ReBakeryInference:
     def __init__(
         self,
-        model_path: str = "models/rebakery.onnx",
+        model_path: str = "models/rebakery.int8.onnx",
         labels_path: str = "models/labels.json",
         confidence_threshold: float = UPLOAD_CONFIDENCE_THRESHOLD,
     ):
@@ -21,6 +21,10 @@ class ReBakeryInference:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.model_path = os.path.join(base_dir, model_path)
         self.labels_path = os.path.join(base_dir, labels_path)
+        if not os.path.exists(self.model_path):
+            fp32_fallback = os.path.join(base_dir, "models", "rebakery.onnx")
+            if os.path.exists(fp32_fallback):
+                self.model_path = fp32_fallback
         self.confidence_threshold = confidence_threshold
         self.architecture = "ConvNeXt-Tiny"
 
@@ -47,7 +51,7 @@ class ReBakeryInference:
 
         # Load ONNX Session
         if not os.path.exists(self.model_path):
-            raise FileNotFoundError(f"Model ONNX tidak ditemukan di: {self.model_path}. Silakan salin rebakery.onnx ke folder models/")
+            raise FileNotFoundError(f"Model ONNX tidak ditemukan di: {self.model_path}. Silakan salin rebakery.int8.onnx atau rebakery.onnx ke folder models/")
 
         # Gunakan CPUExecutionProvider (bisa CUDAExecutionProvider jika GPU server tersedia)
         self.session = ort.InferenceSession(self.model_path, providers=['CPUExecutionProvider'])

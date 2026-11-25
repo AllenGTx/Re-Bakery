@@ -1,5 +1,6 @@
 Dataset/
 Dataset.zip
+backend/models/rebakery.onnx
 **/__pycache__/
 *.pyc
 venv/
@@ -8,3 +9,5 @@ venv/
 .taste-skill/
 .env
 .env.*
+
+.vercel

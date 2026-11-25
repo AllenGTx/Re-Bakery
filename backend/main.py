@@ -49,7 +49,7 @@ def load_model():
         get_engine()
     except Exception as e:
         print(f"⚠️ Peringatan: {e}")
-        print("💡 Pastikan file rebakery.onnx dan labels.json sudah ditaruh di backend/models/")
+        print("💡 Pastikan file rebakery.int8.onnx (atau rebakery.onnx) dan labels.json tersedia di backend/models/")
 
 # Mount static folder untuk web frontend
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
