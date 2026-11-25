@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Re:Bakery - Klasifikasi Visual Roti dan Pastri</title>
+  <link rel="icon" type="image/png" href="/static/assets/logo_croissant.png?v=11" />
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500&display=swap" />
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #111111;
+      --surface: #1c1c1c;
+      --surface-alt: #252220;
+      --surface-hover: #2d2926;
+      --ink: #f2f2f2;
+      --muted: #b3ada7;
+      --accent: #a08672;
+      --accent-strong: #c8ab93;
+      --accent-ink: #111111;
+      --ok: #78b384;
+      --warn: #dda85f;
+      --danger: #e1766c;
+      --track: #2e2a27;
+
+      --margin: clamp(16px, 4vw, 56px);
+      --gutter: clamp(16px, 2.2vw, 32px);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+
+      --step-small: clamp(0.8125rem, 0.79rem + 0.12vw, 0.875rem);
+      --step-body: clamp(1rem, 0.96rem + 0.22vw, 1.125rem);
+      --step-lead: clamp(1.1875rem, 1.06rem + 0.65vw, 1.5rem);
+      --step-head: clamp(1.875rem, 1.45rem + 2vw, 3rem);
+      --step-display: clamp(2.875rem, 2.1rem + 4vw, 5.25rem);
+
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+      --ease-drop: cubic-bezier(0.22, 1, 0.36, 1);
+      --t-fast: 150ms;
+      --t-med: 280ms;
+      --t-slow: 520ms;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      color-scheme: dark;
+      scroll-behavior: smooth;
+      scrollbar-color: #463f39 var(--bg);
+      scrollbar-width: thin;
+    }
+
+    ::selection {
+      background: var(--accent-strong);
+      color: var(--accent-ink);
+    }
+
+    body {
+      font-family: 'Switzer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: var(--step-body);
+      line-height: 1.55;
+      color: var(--ink);
+      background-color: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+      caret-color: var(--accent-strong);
+    }
+
+    .tabular {
+      font-variant-numeric: tabular-nums;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent-strong);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: -60px;
+      left: 24px;
+      z-index: 220;
+      padding: 12px 18px;
+      background: var(--accent-strong);
+      color: var(--accent-ink);
+      font-weight: 500;
+      font-size: var(--step-small);
+      border-radius: var(--radius-sm);
+      transition: top var(--t-fast) var(--ease-out);
+    }
+
+    .skip-link:focus {
+      top: 16px;
+    }
+
+    /* Header: starts hidden while Giant Croissant fills screen, reveals smoothly once torn open */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(17, 17, 17, 0.92);
+      padding: 14px 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: opacity var(--t-med) var(--ease-out), transform var(--t-med) var(--ease-out);
+    }
+
+    html.js .topbar.is-curtain-closed {
+      opacity: 0;
+      transform: translateY(-14px);
+      pointer-events: none;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      font-weight: 500;
+      font-size: 1.0625rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 22px;
+      object-fit: contain;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .re-accent {
+      color: #e6d8c3;
+    }
+
+    .topnav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topnav a {
+      min-height: 44px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      font-size: var(--step-small);
+      color: var(--muted);
+      border-radius: var(--radius-sm);
+      transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out);
+    }
+
+    .topnav a.nav-cta {
+      background: var(--accent-strong);
+      color: var(--accent-ink);
+      font-weight: 500;
+      padding: 0 16px;
+    }
+
+    /* Full-screen Giant Croissant Tear Curtain -> Hero Banner Stage */
+    .hero-stage {
+      position: relative;
+      background: var(--bg);
+    }
+
+    html.js .hero-stage {
+      height: 255svh;
+    }
+
+    .hero-sticky {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+    }
+
+    /* Foreground Layer: Giant 3D Croissant + Roti 1/2 Mounds + Flying Re:Bakery Title */
+    .curtain-3d {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      transition: opacity 220ms var(--ease-out);
+    }
+
+    .curtain-3d.is-open {
+      pointer-events: none;
+    }
+
+    .roti-mound {
+      position: absolute;
+      z-index: 18;
+      width: min(58vw, 88svh);
+      height: auto;
+      bottom: clamp(86px, 15.5svh, 160px);
+      pointer-events: none;
+      filter: brightness(0.92);
+      will-change: transform, opacity;
+    }
+
+    .roti-mound.roti-v-left {
+      left: -3.2vw;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .roti-mound.roti-v-right {
+      right: -3.2vw;
+      transform: translate3d(0, 0, 0);
+    }
+
+    #croissantCanvas {
+      position: relative;
+      z-index: 22;
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0;
+      transition: opacity var(--t-slow) var(--ease-out);
+    }
+
+    #croissantCanvas.is-ready {
+      opacity: 1;
+    }
+
+    /* Re:Bakery title starts centered above Giant Croissant, flies cleanly to Hero Banner h1 on scroll */
+    .flying-brand-title {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 32;
+      font-size: var(--step-display);
+      font-weight: 500;
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      color: var(--ink);
+      transform-origin: top left;
+      pointer-events: none;
+      white-space: nowrap;
+      will-change: transform, opacity;
+    }
+
+    html.js .hero-title.is-awaiting-flight {
+      opacity: 0;
+    }
+
+    .tear-cue {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      z-index: 24;
+      background: rgba(17, 17, 17, 0.88);
+      padding: 10px 22px;
+      border-radius: 999px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: var(--step-small);
+      text-align: center;
+      pointer-events: none;
+      transition: opacity var(--t-med) var(--ease-out), transform var(--t-med) var(--ease-out);
+    }
+
+    .tear-cue.is-hidden {
+      opacity: 0;
+      transform: translate(-50%, 10px);
+    }
+
+    .tear-meter {
+      width: 120px;
+      height: 3px;
+      background: var(--track);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .tear-meter-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-strong);
+    }
+
+    /* Underlying Layer: Hero Banner revealed as Giant Croissant tears open */
+    .hero-banner-reveal {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      padding: 88px 56px 40px;
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      gap: 40px;
+      align-items: center;
+    }
+
+    html.js .hero-banner-reveal {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    .hero-copy {
+      max-width: 520px;
+    }
+
+    .hero-title {
+      font-size: var(--step-display);
+      font-weight: 500;
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      margin-bottom: 20px;
+    }
+
+    .hero-lead {
+      font-size: var(--step-lead);
+      line-height: 1.4;
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 0 24px;
+      background: var(--accent-strong);
+      color: var(--accent-ink);
+      font-weight: 500;
+      font-size: var(--step-body);
+      border-radius: var(--radius-md);
+      transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 0 18px;
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 500;
+      font-size: var(--step-small);
+      border-radius: var(--radius-md);
+      transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.97);
+    }
+
+    /* Real Croissant Studio Showcase + Falling Croissants from Top */
+    .hero-real-stage {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      justify-self: end;
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .falling-croissant {
+      pointer-events: none;
+      height: auto;
+      display: block;
+      opacity: 0;
+      transition: transform 960ms var(--ease-drop), opacity 360ms var(--ease-out);
+    }
+
+    .falling-croissant.fall-main {
+      position: relative;
+      z-index: 2;
+      width: min(82%, 490px);
+      transform: translate3d(0, -95svh, 0) rotate(-14deg);
+      transition-delay: 0ms;
+    }
+
+    .falling-croissant.fall-top-right {
+      position: absolute;
+      z-index: 1;
+      top: -12px;
+      right: 0;
+      width: clamp(130px, 24%, 195px);
+      transform: translate3d(0, -110svh, 0) rotate(28deg);
+      transition-delay: 140ms;
+    }
+
+    .falling-croissant.fall-bottom-left {
+      position: absolute;
+      z-index: 3;
+      bottom: -8px;
+      left: 8px;
+      width: clamp(135px, 25%, 205px);
+      transform: translate3d(0, -118svh, 0) rotate(-24deg);
+      transition-delay: 250ms;
+    }
+
+    .hero-real-stage.is-landed .falling-croissant.fall-main {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+
+    .hero-real-stage.is-landed .falling-croissant.fall-top-right {
+      opacity: 0.92;
+      transform: translate3d(0, 0, 0) rotate(12deg);
+    }
+
+    .hero-real-stage.is-landed .falling-croissant.fall-bottom-left {
+      opacity: 0.96;
+      transform: translate3d(0, 0, 0) rotate(-8deg);
+    }
+
+    /* Section scaffold */
+    .section {
+      padding: 88px 56px;
+      scroll-margin-top: 84px;
+    }
+
+    #katalog {
+      scroll-margin-top: 84px;
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    #classifier .section-head {
+      flex-wrap: nowrap;
+      gap: 24px;
+    }
+
+    #classifier .section-title {
+      max-width: none;
+    }
+
+    .section-title {
+      font-size: var(--step-head);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      max-width: 18ch;
+    }
+
+    .section-sub {
+      max-width: 44ch;
+      color: var(--muted);
+      font-size: var(--step-body);
+    }
+
+    html.js [data-reveal] {
+      opacity: 1;
+      transform: none;
+    }
+
+    .split-word {
+      display: inline-block;
+      vertical-align: top;
+      will-change: transform, opacity;
+    }
+
+    .split-word-mask {
+      display: inline-block;
+      vertical-align: top;
+      overflow: clip;
+    }
+
+    /* Classifier Workspace (data-ui interactive fragment) */
+    .mode-switch {
+      display: inline-flex;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      gap: 4px;
+    }
+
+    .mode-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 18px;
+      font-size: var(--step-small);
+      font-weight: 500;
+      color: var(--muted);
+      border-radius: var(--radius-sm);
+      transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+    }
+
+    .mode-btn[aria-selected="true"] {
+      background: var(--accent-strong);
+      color: var(--accent-ink);
+    }
+
+    .mode-btn:active {
+      transform: scale(0.97);
+    }
+
+    .classifier-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: var(--gutter);
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: var(--step-lead);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--surface-alt);
+      color: var(--muted);
+      font-size: var(--step-small);
+      border-radius: var(--radius-sm);
+    }
+
+    .status-tag.is-ok {
+      color: var(--ok);
+    }
+
+    .status-tag.is-warn {
+      color: var(--warn);
+    }
+
+    .dropzone {
+      position: relative;
+      min-height: 300px;
+      background: var(--surface-alt);
+      border-radius: var(--radius-md);
+      outline: 2px dashed rgba(200, 171, 147, 0.3);
+      outline-offset: -12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 28px;
+      gap: 12px;
+      transition: background-color var(--t-fast) var(--ease-out), outline-color var(--t-fast) var(--ease-out);
+    }
+
+    .dropzone.is-dragover {
+      background: var(--surface-hover);
+      outline-color: var(--accent-strong);
+    }
+
+    .dropzone.has-image {
+      outline: none;
+      padding: 0;
+      overflow: hidden;
+      background: #0b0b0b;
+    }
+
+    .file-input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .dropzone.has-image .file-input {
+      pointer-events: none;
+    }
+
+    .drop-icon {
+      width: 36px;
+      height: 36px;
+      color: var(--accent-strong);
+    }
+
+    .drop-title {
+      font-weight: 500;
+      font-size: var(--step-body);
+    }
+
+    .drop-hint {
+      color: var(--muted);
+      font-size: var(--step-small);
+      max-width: 32ch;
+    }
+
+    .preview-slot {
+      width: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dropzone.has-image .preview-slot {
+      display: flex;
+    }
+
+    .dropzone.has-image .drop-empty {
+      display: none;
+    }
+
+    .preview-slot img {
+      max-width: 100%;
+      max-height: 360px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .clear-photo-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 4;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      background: rgba(17, 17, 17, 0.88);
+      color: var(--ink);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+    }
+
+    .dropzone.has-image .clear-photo-btn {
+      display: inline-flex;
+    }
+
+    .clear-photo-btn:active {
+      transform: scale(0.94);
+    }
+
+    .inline-alert {
+      display: none;
+      padding: 12px 16px;
+      background: var(--surface-alt);
+      color: var(--danger);
+      font-size: var(--step-small);
+      border-radius: var(--radius-sm);
+    }
+
+    .inline-alert.is-visible {
+      display: block;
+    }
+
+    /* Results side */
+    .result-placeholder {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px 0;
+      color: var(--muted);
+    }
+
+    .result-placeholder strong {
+      color: var(--ink);
+      font-weight: 500;
+      font-size: var(--step-lead);
+    }
+
+    .result-loading {
+      display: none;
+      padding: 28px 0;
+      color: var(--muted);
+      font-size: var(--step-body);
+    }
+
+    .result-content {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .winner-box {
+      background: var(--surface-alt);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .winner-thumb {
+      width: 84px;
+      height: 63px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .winner-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .winner-badge {
+      display: inline-block;
+      font-size: var(--step-small);
+      color: var(--accent-strong);
+      margin-top: 2px;
+      margin-bottom: 10px;
+    }
+
+    .winner-box.is-unclassified .winner-badge {
+      color: var(--warn);
+    }
+
+    .winner-name {
+      font-size: clamp(1.375rem, 1.1rem + 1vw, 1.875rem);
+      font-weight: 500;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 7px;
+      background: var(--track);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-strong);
+      border-radius: 4px;
+      transition: width var(--t-slow) var(--ease-out);
+    }
+
+    .winner-box.is-unclassified .bar-fill {
+      background: var(--warn);
+    }
+
+    .bar-val {
+      min-width: 60px;
+      text-align: right;
+      font-size: var(--step-small);
+      font-weight: 500;
+    }
+
+    .unclassified-note {
+      display: none;
+      background: var(--surface-alt);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-size: var(--step-small);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .unclassified-note strong {
+      display: block;
+      color: var(--warn);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .top3-heading {
+      font-size: var(--step-small);
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .top3-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .top3-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 1fr) 1fr 60px;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface-alt);
+      border-radius: var(--radius-sm);
+      font-size: var(--step-small);
+    }
+
+    .top3-row .bar-track {
+      height: 5px;
+    }
+
+    /* Camera Mode */
+    .camera-wrap {
+      display: none;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .camera-wrap.is-active {
+      display: flex;
+    }
+
+    .camera-stage {
+      position: relative;
+      width: 100%;
+      max-height: 520px;
+      aspect-ratio: 16 / 9;
+      background: #0a0a0a;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .camera-guide {
+      position: absolute;
+      width: clamp(160px, 32%, 250px);
+      aspect-ratio: 1 / 1;
+      outline: 2px dashed rgba(200, 171, 147, 0.72);
+      border-radius: var(--radius-sm);
+      pointer-events: none;
+      display: none;
+    }
+
+    .camera-hud {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      max-width: min(340px, calc(100% - 32px));
+      padding: 14px 16px;
+      background: rgba(17, 17, 17, 0.92);
+      border-radius: var(--radius-md);
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .camera-hud-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: var(--step-body);
+      font-weight: 500;
+    }
+
+    .dot-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .dot-indicator.is-live {
+      background: var(--ok);
+    }
+
+    .dot-indicator.is-warn {
+      background: var(--warn);
+    }
+
+    .camera-idle {
+      text-align: center;
+      padding: 28px;
+      max-width: 40ch;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+    }
+
+    .camera-idle strong {
+      color: var(--ink);
+      font-weight: 500;
+      font-size: var(--step-lead);
+    }
+
+    .camera-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .camera-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .camera-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--step-small);
+      color: var(--muted);
+    }
+
+    /* Catalog (Sticky photograph, active list) */
+    .catalog-section {
+      background: var(--surface);
+      padding: 88px 56px;
+    }
+
+    .catalog-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .catalog-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .catalog-item {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      min-height: 140px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      display: grid;
+      grid-template-columns: 164px 1fr;
+      align-items: center;
+      gap: 20px;
+      transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+    }
+
+    .catalog-item[aria-pressed="true"] {
+      background: var(--surface-alt);
+    }
+
+    .catalog-thumb {
+      width: 164px;
+      height: 123px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .catalog-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .catalog-name {
+      display: block;
+      font-size: var(--step-lead);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .catalog-desc {
+      display: block;
+      font-size: var(--step-small);
+      color: var(--muted);
+    }
+
+    .catalog-sticky {
+      position: sticky;
+      top: 12svh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .specimen-frame {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .specimen-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity var(--t-med) var(--ease-out);
+    }
+
+    @keyframes catalog-enter {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes specimen-image-enter {
+      from {
+        opacity: 0;
+        transform: scale(1.035);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes specimen-text-enter {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #katalog .catalog-item.is-entering,
+    #katalog .catalog-sticky.is-entering {
+      animation: catalog-enter 650ms var(--ease-out) both;
+    }
+
+    #katalog .specimen-frame.is-entering img {
+      animation: specimen-image-enter 560ms var(--ease-out) both;
+    }
+
+    #katalog .specimen-caption.is-entering,
+    #katalog .specimen-detail.is-entering {
+      animation: specimen-text-enter 480ms var(--ease-out) both;
+    }
+
+    .specimen-caption {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .specimen-title {
+      font-size: var(--step-lead);
+      font-weight: 500;
+    }
+
+    .specimen-code {
+      font-size: var(--step-small);
+      color: var(--accent-strong);
+    }
+
+    .specimen-detail {
+      color: var(--muted);
+      font-size: var(--step-body);
+      line-height: 1.6;
+    }
+
+    /* Practical Notes & Footer */
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--gutter);
+    }
+
+    .note-block {
+      background: var(--surface);
+      padding: 28px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .note-block h3 {
+      font-size: var(--step-lead);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .note-block p {
+      color: var(--muted);
+    }
+
+    .site-footer {
+      padding: 40px 56px 56px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .footer-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: var(--step-lead);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .footer-meta {
+      font-size: var(--step-small);
+      color: var(--muted);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .topnav a:not(.nav-cta):hover {
+        color: var(--ink);
+        background: var(--surface);
+      }
+
+      .topnav a.nav-cta:hover,
+      .btn-primary:hover {
+        background: #d7baa2;
+      }
+
+      .btn-secondary:hover,
+      .mode-btn:not([aria-selected="true"]):hover,
+      .catalog-item:hover {
+        background: var(--surface-hover);
+      }
+
+      .clear-photo-btn:hover {
+        background: var(--surface-hover);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .topbar {
+        padding: 14px 24px;
+      }
+
+      .hero-banner-reveal {
+        grid-template-columns: 1fr;
+        padding: 76px 24px 32px;
+        gap: 24px;
+      }
+
+      .hero-real-stage {
+        order: -1;
+        max-width: 520px;
+        justify-self: center;
+      }
+
+      .section,
+      .catalog-section {
+        padding: 64px 24px;
+      }
+
+      .site-footer {
+        padding: 36px 24px 48px;
+      }
+
+      .classifier-grid,
+      .catalog-layout,
+      .notes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .catalog-sticky {
+        position: static;
+        order: -1;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #classifier .section-head {
+        flex-wrap: wrap;
+      }
+
+      .topnav a.hide-mobile {
+        display: none;
+      }
+
+      .topbar {
+        padding: 12px 18px;
+      }
+
+      .hero-banner-reveal {
+        padding: 68px 18px 28px;
+      }
+
+      .falling-croissant.fall-top-right {
+        width: 108px;
+        top: -6px;
+        right: 0;
+      }
+
+      .falling-croissant.fall-bottom-left {
+        width: 114px;
+        bottom: -4px;
+        left: 0;
+      }
+
+      .section,
+      .catalog-section {
+        padding: 52px 18px;
+      }
+
+      .site-footer {
+        padding: 32px 18px 44px;
+      }
+
+      .panel,
+      .camera-wrap,
+      .note-block {
+        padding: 20px;
+      }
+
+      .winner-box {
+        grid-template-columns: 1fr;
+      }
+
+      .winner-thumb {
+        width: 100%;
+        height: 160px;
+      }
+
+      .top3-row {
+        grid-template-columns: 1fr 56px;
+      }
+
+      .top3-row .bar-track {
+        display: none;
+      }
+
+      .catalog-item {
+        grid-template-columns: 104px 1fr;
+        min-height: 92px;
+        gap: 14px;
+        padding: 12px;
+      }
+
+      .catalog-thumb {
+        width: 104px;
+        height: 78px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      html.js .hero-stage {
+        height: auto;
+        min-height: 100svh;
+      }
+
+      .hero-sticky {
+        position: relative;
+        height: auto;
+        min-height: 100svh;
+      }
+
+      .curtain-3d,
+      .flying-brand-title {
+        display: none;
+      }
+
+      html.js .hero-title.is-awaiting-flight {
+        opacity: 1;
+      }
+
+      html.js .topbar.is-curtain-closed {
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
+
+      html.js .hero-banner-reveal {
+        opacity: 1;
+        transform: none;
+      }
+
+      .falling-croissant {
+        opacity: 1;
+        transform: none !important;
+      }
+
+      * {
+        transition-duration: 0.01ms !important;
+      }
+
+      .split-word,
+      .split-word-mask {
+        will-change: auto;
+      }
+
+      #katalog .catalog-item.is-entering,
+      #katalog .catalog-sticky.is-entering,
+      #katalog .specimen-frame.is-entering img,
+      #katalog .specimen-caption.is-entering,
+      #katalog .specimen-detail.is-entering {
+        animation: none;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#classifier">Lewati ke Klasifikasi</a>
+
+  <header class="topbar is-curtain-closed" id="siteTopbar">
+    <a class="brand" href="#heroStage">
+      <img class="brand-mark" src="/static/assets/logo_croissant.png?v=11" alt="" width="192" height="153" />
+      <span><span class="re-accent">Re:</span>Bakery</span>
+    </a>
+    <nav class="topnav" aria-label="Navigasi utama">
+      <a class="hide-mobile" href="#classifier">Deteksi</a>
+      <a class="hide-mobile" href="#katalog">8 Kelas</a>
+      <a class="nav-cta" href="#classifier">Mulai Uji</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-stage" id="heroStage" aria-label="Pembuka Croissant dan Hero">
+      <div class="hero-sticky" id="heroSticky">
+        <!-- Flying Re:Bakery title: starts above Giant Croissant, glides to Hero Banner h1 on scroll -->
+        <div class="flying-brand-title" id="flyingTitle" aria-hidden="true"><span class="re-accent">Re:</span>Bakery</div>
+
+        <!-- Foreground Curtain: V-Shaped Left & Right Gourmet Croissant Triangle Mounds behind Giant 3D Croissant -->
+        <div class="curtain-3d" id="curtain3d" aria-hidden="true">
+          <img class="roti-mound roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.png?v=11" alt="" width="932" height="707" />
+          <img class="roti-mound roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.png?v=11" alt="" width="933" height="720" />
+          <canvas id="croissantCanvas"></canvas>
+          <div class="tear-cue" id="tearCue">
+            <span id="tearCueLabel">Gulir ke bawah untuk merobek croissant</span>
+            <div class="tear-meter"><div class="tear-meter-fill" id="tearMeterFill"></div></div>
+          </div>
+        </div>
+
+        <!-- Underlying Hero Banner revealed as the Giant Croissant opens -->
+        <div class="hero-banner-reveal" id="heroBannerReveal">
+          <div class="hero-copy">
+            <h1 class="hero-title is-awaiting-flight" id="heroTargetTitle"><span class="re-accent">Re:</span>Bakery</h1>
+            <p class="hero-lead">Kenali delapan jenis roti dan pastri dari foto atau kamera langsung dengan ambang batas penolakan otomatis.</p>
+            <div class="hero-actions">
+              <a class="btn-primary" href="#classifier">Mulai Klasifikasi</a>
+              <a class="btn-secondary" href="#katalog">Lihat 8 Kelas</a>
+            </div>
+          </div>
+
+          <div class="hero-real-stage" id="heroRealStage">
+            <img class="falling-croissant fall-main" src="/static/assets/croissant_hero_cutout.png" alt="Croissant mentega renyah berlapis keemasan" width="920" height="813" fetchpriority="high" />
+            <img class="falling-croissant fall-top-right" src="/static/assets/croissant_fall_1.png" alt="" width="540" height="508" aria-hidden="true" />
+            <img class="falling-croissant fall-bottom-left" src="/static/assets/croissant_fall_2.png" alt="" width="580" height="564" aria-hidden="true" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="classifier" data-ui aria-labelledby="classifierHeading">
+      <div class="section-head" data-reveal>
+        <div>
+          <h2 class="section-title" id="classifierHeading">Uji klasifikasi secara langsung</h2>
+        </div>
+        <div class="mode-switch" role="tablist" aria-label="Pilih metode input">
+          <button class="mode-btn" id="tabUpload" type="button" role="tab" aria-selected="true" aria-controls="panelUploadWrap">Upload Gambar</button>
+          <button class="mode-btn" id="tabCamera" type="button" role="tab" aria-selected="false" aria-controls="panelCameraWrap">Kamera Langsung</button>
+        </div>
+      </div>
+
+      <div class="classifier-grid" id="panelUploadWrap" role="tabpanel" aria-labelledby="tabUpload">
+        <div class="panel" data-reveal>
+          <div class="panel-head">
+            <h3 class="panel-title">Foto Pastri</h3>
+            <span class="status-tag" id="fileStatus">Belum ada file</span>
+          </div>
+
+          <div class="dropzone" id="dropzone">
+            <input class="file-input" id="fileInput" type="file" accept="image/*" aria-label="Pilih file foto roti atau pastri" />
+            <button class="clear-photo-btn" id="clearBtn" type="button" aria-label="Hapus foto yang dipilih">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <div class="drop-empty">
+              <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="17 8 12 3 7 8" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="12" y1="3" x2="12" y2="15" stroke-linecap="round"/>
+              </svg>
+              <p class="drop-title">Pilih foto atau tarik file ke area ini</p>
+              <p class="drop-hint">Mendukung JPG, PNG, dan WEBP dengan ambang yakin minimal 32%.</p>
+            </div>
+
+            <div class="preview-slot" id="previewSlot"></div>
+          </div>
+
+          <div class="inline-alert" id="uploadError" role="alert"></div>
+        </div>
+
+        <div class="panel" data-reveal aria-live="polite">
+          <div class="panel-head">
+            <h3 class="panel-title">Hasil Model</h3>
+            <span class="status-tag tabular" id="latencyTag">Menunggu</span>
+          </div>
+
+          <div class="result-placeholder" id="resultEmpty">
+            <strong>Menunggu gambar</strong>
+            <p>Unggah satu foto pastri untuk membaca kelas teratas, skor keyakinan, dan status ambang batas.</p>
+          </div>
+
+          <div class="result-loading" id="resultLoading">
+            Memproses orientasi gambar dan mengekstrak fitur ConvNeXt-Tiny...
+          </div>
+
+          <div class="result-content" id="resultBody">
+            <div class="winner-box" id="winnerBox">
+              <div class="winner-thumb" id="winnerThumb"></div>
+              <div>
+                <div class="winner-name" id="winnerName">-</div>
+                <span class="winner-badge" id="winnerKicker">Teridentifikasi sebagai kelas terlatih</span>
+                <div class="bar-row">
+                  <div class="bar-track"><div class="bar-fill" id="winnerBar"></div></div>
+                  <span class="bar-val tabular" id="winnerPct">0%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="unclassified-note" id="unclassifiedBox">
+              <strong>Tidak Terklasifikasi</strong>
+              <span id="unclassifiedText">Skor berada di bawah ambang batas 32%. Objek kemungkinan berada di luar 8 kelas terlatih. Nantinya cadangan API LLM Vision akan membantu menjelaskan kemungkinan objek ini.</span>
+            </div>
+
+            <div>
+              <p class="top3-heading" id="top3Label">Tiga Kelas Teratas</p>
+              <div class="top3-list" id="top3List"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="camera-wrap" id="panelCameraWrap" role="tabpanel" aria-labelledby="tabCamera">
+        <div class="panel-head">
+          <h3 class="panel-title">Pemindaian Kamera</h3>
+          <span class="status-tag tabular">Ambang batas 40%</span>
+        </div>
+
+        <div class="camera-stage" id="cameraStage">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <div class="camera-guide" id="cameraGuide" aria-hidden="true"></div>
+
+          <div class="camera-hud" id="cameraHud">
+            <div class="camera-hud-top">
+              <span class="dot-indicator" id="hudDot"></span>
+              <span id="hudClass">Menyiapkan...</span>
+            </div>
+            <div class="bar-row">
+              <div class="bar-track"><div class="bar-fill" id="hudBar"></div></div>
+              <span class="bar-val tabular" id="hudPct">-</span>
+            </div>
+          </div>
+
+          <div class="camera-idle" id="cameraIdle">
+            <strong>Kamera belum aktif</strong>
+            <p>Arahkan pastri ke kotak bidik persegi di tengah layar untuk prediksi berkelanjutan.</p>
+          </div>
+        </div>
+
+        <div class="inline-alert" id="cameraError" role="alert"></div>
+
+        <div class="camera-bar">
+          <div class="camera-actions">
+            <button class="btn-primary" id="startCamBtn" type="button">Mulai Kamera</button>
+            <button class="btn-secondary" id="switchCamBtn" type="button">Balik Kamera</button>
+          </div>
+          <div class="camera-meta tabular">
+            <span class="dot-indicator" id="camStateDot"></span>
+            <span id="camStateText">Siap</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog-section" id="katalog" aria-labelledby="katalogHeading">
+      <div class="section-head" data-reveal>
+        <h2 class="section-title" id="katalogHeading">Delapan jenis yang dikenali</h2>
+        <p class="section-sub">Setiap kelas menggunakan ciri permukaan kulit, lipatan laminasi, dan kontur rongga untuk membedakan pastri serupa.</p>
+      </div>
+
+      <div class="catalog-layout">
+        <div class="catalog-list" id="catalogList">
+          <button class="catalog-item" type="button" aria-pressed="true" data-class="Baguette" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/Baguette.jpg" alt="Foto contoh Baguette" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Baguette</span>
+              <span class="catalog-desc">Siluet memanjang dengan sayatan diagonal panggang kering</span>
+            </span>
+          </button>
+
+          <button class="catalog-item" type="button" aria-pressed="false" data-class="Croissant" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/e5c24fe86c3edf303dd5403a6577a79e3952a501.avif" alt="Foto contoh Croissant" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Croissant</span>
+              <span class="catalog-desc">Puncak tengah tinggi berlapis dengan gulungan bertingkat</span>
+            </span>
+          </button>
+
+          <button class="catalog-item" type="button" aria-pressed="false" data-class="Cromboloni" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/Cromboloni.webp" alt="Foto contoh Cromboloni" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Cromboloni</span>
+              <span class="catalog-desc">Silinder berlapis melingkar dengan isian atau glasir atas</span>
+            </span>
+          </button>
+
+          <button class="catalog-item" type="button" aria-pressed="false" data-class="Donut" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/Donut.jfif" alt="Foto contoh Donut" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Donut</span>
+              <span class="catalog-desc">Bentuk bulat penuh berlapis cokelat atau gula tanpa lubang tengah</span>
+            </span>
+          </button>
+
+          <button class="catalog-item" type="button" aria-pressed="false" data-class="Hole_Donut" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/HoleDonut.jpg" alt="Foto contoh Hole Donut" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Hole Donut</span>
+              <span class="catalog-desc">Cincin terbuka dengan lubang kontras di bagian tengah</span>
+            </span>
+          </button>
+
+          <button class="catalog-item" type="button" aria-pressed="false" data-class="Pie_Susu" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/PieSUSU.jfif" alt="Foto contoh Pie Susu" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Pie Susu</span>
+              <span class="catalog-desc">Tepi tart berlekuk tipis dengan tengah puding susu halus</span>
+            </span>
+          </button>
+
+          <button class="catalog-item" type="button" aria-pressed="false" data-class="Pretzel" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/Pretzel.jpg" alt="Foto contoh Pretzel" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Pretzel</span>
+              <span class="catalog-desc">Simpul panggang cokelat tua dengan butiran garam kasar</span>
+            </span>
+          </button>
+
+          <button class="catalog-item" type="button" aria-pressed="false" data-class="Sliced_Bread" data-reveal>
+            <span class="catalog-thumb"><img src="/samples/SlicedBread.webp" alt="Foto contoh Sliced Bread" width="960" height="720" /></span>
+            <span>
+              <span class="catalog-name">Sliced Bread</span>
+              <span class="catalog-desc">Irisan roti tawar kotak dengan remah terbuka di permukaan</span>
+            </span>
+          </button>
+        </div>
+
+        <aside class="catalog-sticky" data-reveal aria-live="polite">
+          <div class="specimen-frame">
+            <img id="specimenImg" src="/samples/Baguette.jpg" alt="Pratinjau kelas Baguette" width="960" height="720" />
+          </div>
+          <div class="specimen-caption">
+            <h3 class="specimen-title" id="specimenTitle">Baguette</h3>
+            <span class="specimen-code tabular" id="specimenCode">Kelas 1 dari 8</span>
+          </div>
+          <p class="specimen-detail" id="specimenDetail">Baguette (dibaca: ba-get) adalah roti klasik khas Prancis berbentuk panjang dan ramping seperti tongkat, yang memiliki tekstur kontras berupa kulit luar cokelat keemasan yang garing serta bagian dalam yang lembut, kenyal, dan berongga. Sesuai tradisi dan hukum Prancis, adonan roti ikon budaya yang telah diakui UNESCO ini hanya dibuat dari empat bahan dasar—tepung terigu, air, ragi, dan garam—tanpa tambahan lemak atau gula, sehingga paling nikmat disantap segar pada hari pembuatannya sebagai teman sarapan, isian sandwich, maupun pendamping sup.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" aria-label="Catatan teknis penggunaan">
+      <div class="notes-grid">
+        <article class="note-block" data-reveal>
+          <h3>Ambang batas dua mode</h3>
+          <p>Unggahan foto memakai ambang 32% untuk menangani foto sudut dekat dan tata letak piring. Mode kamera memakai 40% agar wajah atau ruangan kosong tidak memicu deteksi palsu.</p>
+        </article>
+        <article class="note-block" data-reveal>
+          <h3>Potongan persegi terpusat</h3>
+          <p>Frame kamera hanya mengirim area 1:1 di dalam kotak bidik tengah. Pastikan satu jenis roti mengisi fokus bidikan untuk meminimalkan gangguan latar belakang.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span class="footer-name">
+      <img class="brand-mark" src="/static/assets/logo_croissant.png?v=11" alt="" width="192" height="153" />
+      <span><span class="re-accent">Re:</span>Bakery</span>
+    </span>
+    <span class="footer-meta">ConvNeXt-Tiny ONNX · Foto hero: Herry Wibisono (CC0), Tiia Monto (CC BY-SA 4.0), SKopp (CC BY-SA 3.0) via Wikimedia Commons</span>
+  </footer>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const heroStage = document.getElementById("heroStage");
+    const heroSticky = document.getElementById("heroSticky");
+    const curtain3d = document.getElementById("curtain3d");
+    const heroCanvas = document.getElementById("croissantCanvas");
+    const rotiLeftFront = document.getElementById("rotiLeftFront");
+    const rotiRightFront = document.getElementById("rotiRightFront");
+    const flyingTitle = document.getElementById("flyingTitle");
+    const heroTargetTitle = document.getElementById("heroTargetTitle");
+    const tearCue = document.getElementById("tearCue");
+    const tearCueLabel = document.getElementById("tearCueLabel");
+    const tearMeterFill = document.getElementById("tearMeterFill");
+    const heroBannerReveal = document.getElementById("heroBannerReveal");
+    const heroRealStage = document.getElementById("heroRealStage");
+    const siteTopbar = document.getElementById("siteTopbar");
+
+    function initGiantCroissantCurtain() {
+      if (reducedMotion || !heroCanvas || !heroStage) {
+        curtain3d?.classList.add("is-open");
+        if (curtain3d) curtain3d.style.display = "none";
+        if (flyingTitle) flyingTitle.style.display = "none";
+        heroTargetTitle?.classList.remove("is-awaiting-flight");
+        siteTopbar?.classList.remove("is-curtain-closed");
+        if (heroBannerReveal) {
+          heroBannerReveal.style.opacity = "1";
+          heroBannerReveal.style.transform = "none";
+        }
+        heroRealStage?.classList.add("is-landed");
+        return;
+      }
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas: heroCanvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+      } catch {
+        curtain3d.style.display = "none";
+        if (flyingTitle) flyingTitle.style.display = "none";
+        heroTargetTitle?.classList.remove("is-awaiting-flight");
+        siteTopbar?.classList.remove("is-curtain-closed");
+        heroBannerReveal.style.opacity = "1";
+        heroBannerReveal.style.transform = "none";
+        heroRealStage?.classList.add("is-landed");
+        return;
+      }
+
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 100);
+
+      const ambient = new THREE.AmbientLight(0xfff8ed, 1.22);
+      scene.add(ambient);
+
+      const keyLight = new THREE.DirectionalLight(0xfff4e0, 1.95);
+      keyLight.position.set(2.8, 3.9, 4.8);
+      scene.add(keyLight);
+
+      const rimLight = new THREE.DirectionalLight(0xffdca8, 1.25);
+      rimLight.position.set(-4.2, 2.8, -2.4);
+      scene.add(rimLight);
+
+      // Side-raking warm light so 3D bread cavities & uneven ridges cast natural soft shadows without glare
+      const tearRakeLight = new THREE.PointLight(0xffe0a8, 1.05, 9.0);
+      tearRakeLight.position.set(0.0, 1.55, 1.45);
+      scene.add(tearRakeLight);
+
+      const trayBounce = new THREE.DirectionalLight(0xc28b52, 0.58);
+      trayBounce.position.set(0, -3.6, 2.4);
+      scene.add(trayBounce);
+
+      const pivot = new THREE.Group();
+      scene.add(pivot);
+
+      const crumbsGroup = new THREE.Group();
+      pivot.add(crumbsGroup);
+      const crumbParticles = [];
+      function makeFlakeGeometry(seed) {
+        const g = new THREE.BufferGeometry();
+        const r = (k) => {
+          const v = Math.sin((seed * 7 + k) * 19.37) * 43758.5453;
+          return v - Math.floor(v);
+        };
+        const pts = [];
+        const n = 5;
+        for (let k = 0; k < n; k++) {
+          const a0 = (k / n) * Math.PI * 2;
+          const a1 = ((k + 1) / n) * Math.PI * 2;
+          const rad0 = 0.016 + r(k) * 0.022;
+          const rad1 = 0.016 + r(k + 1) * 0.022;
+          pts.push(
+            0, 0.004 * (r(9) - 0.5), 0,
+            Math.cos(a0) * rad0, 0.006 * (r(k + 3) - 0.5), Math.sin(a0) * rad0 * 0.72,
+            Math.cos(a1) * rad1, 0.006 * (r(k + 4) - 0.5), Math.sin(a1) * rad1 * 0.72
+          );
+        }
+        g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+        g.computeVertexNormals();
+        return g;
+      }
+      const flakeGeos = [makeFlakeGeometry(1), makeFlakeGeometry(2), makeFlakeGeometry(3)];
+      const crumbMatGold = new THREE.MeshStandardMaterial({ color: 0xe8b458, roughness: 0.76, metalness: 0.0, side: THREE.DoubleSide });
+      const crumbMatDark = new THREE.MeshStandardMaterial({ color: 0x7c340e, roughness: 0.62, metalness: 0.0, side: THREE.DoubleSide });
+      for (let i = 0; i < 24; i++) {
+        const mesh = new THREE.Mesh(flakeGeos[i % 3], i % 3 === 0 ? crumbMatDark : crumbMatGold);
+        const seedA = Math.sin((i + 1) * 12.9898) * 43758.5453;
+        const r1 = seedA - Math.floor(seedA);
+        const r2 = (seedA * 1.73) - Math.floor(seedA * 1.73);
+        const r3 = (seedA * 2.41) - Math.floor(seedA * 2.41);
+        const s = 0.75 + r1 * 1.15;
+        mesh.scale.set(s, s, s);
+        crumbParticles.push({
+          mesh,
+          y0: (r1 - 0.36) * 0.95,
+          z0: (r2 - 0.3) * 0.65,
+          vx: (r3 - 0.5) * 1.35,
+          vy: -0.60 - r1 * 1.35,
+          rx: (r2 - 0.5) * 8.5,
+          rz: (r3 - 0.5) * 8.5,
+        });
+        mesh.visible = false;
+        crumbsGroup.add(mesh);
+      }
+
+      let leftHalf = null;
+      let rightHalf = null;
+      let normScale = 1;
+      let targetProgress = 0;
+      let currentProgress = 0;
+      let ptrX = 0;
+      let ptrY = 0;
+      let curPtrX = 0;
+      let curPtrY = 0;
+      let modelReady = false;
+      let titleMetrics = { startX: 0, startY: 72, endX: 56, endY: 320, startScale: 1.08 };
+
+      function measureTitleEndpoints() {
+        if (!flyingTitle || !heroTargetTitle || !heroSticky) return;
+        const stickyRect = heroSticky.getBoundingClientRect();
+        const prevTransform = heroBannerReveal.style.transform;
+        heroBannerReveal.style.transform = "none";
+        const targetRect = heroTargetTitle.getBoundingClientRect();
+        heroBannerReveal.style.transform = prevTransform;
+
+        const w = stickyRect.width || window.innerWidth;
+        const h = stickyRect.height || window.innerHeight;
+        const naturalW = flyingTitle.offsetWidth || 320;
+        const sScale = w < 640 ? 1.0 : 1.08;
+
+        titleMetrics = {
+          startX: Math.max(16, (w - naturalW * sScale) * 0.5),
+          startY: Math.max(32, Math.min(h * 0.095, 86)),
+          endX: targetRect.left - stickyRect.left,
+          endY: targetRect.top - stickyRect.top,
+          startScale: sScale,
+        };
+      }
+
+      function resizeScene() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+
+        const aspect = w / Math.max(1, h);
+        const vFovRad = (camera.fov * Math.PI) / 180;
+        const desiredWorldWidth = aspect < 0.85 ? 4.30 : 4.66;
+        const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.55, aspect));
+        camera.position.set(0, 0.04, Math.max(6.05, distForWidth));
+        pivot.position.set(0, aspect < 0.85 ? -0.22 : -0.27, 0);
+        measureTitleEndpoints();
+      }
+
+      resizeScene();
+      window.addEventListener("resize", resizeScene);
+      if (document.fonts?.ready) {
+        document.fonts.ready.then(measureTitleEndpoints);
+      }
+
+      function updateScroll() {
+        const rect = heroStage.getBoundingClientRect();
+        const scrollable = Math.max(1, heroStage.offsetHeight - window.innerHeight);
+        const scrolled = Math.min(scrollable, Math.max(0, -rect.top));
+        targetProgress = scrolled / scrollable;
+      }
+
+      window.addEventListener("scroll", updateScroll, { passive: true });
+      updateScroll();
+
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        window.addEventListener("pointermove", (e) => {
+          ptrX = (e.clientX / window.innerWidth - 0.5) * 2;
+          ptrY = (e.clientY / window.innerHeight - 0.5) * 2;
+        }, { passive: true });
+      }
+
+      const loader = new GLTFLoader();
+      loader.load(
+        "/static/assets/croissant_split.glb?v=7",
+        (gltf) => {
+          const model = gltf.scene;
+          const box = new THREE.Box3().setFromObject(model);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          normScale = 4.02 / Math.max(size.x, size.y, size.z, 0.001);
+
+          model.position.sub(center);
+          const holder = new THREE.Group();
+          holder.scale.setScalar(normScale);
+          holder.add(model);
+          pivot.add(holder);
+
+          leftHalf = model.getObjectByName("croissant_left");
+          rightHalf = model.getObjectByName("croissant_right");
+
+          modelReady = true;
+          heroCanvas.classList.add("is-ready");
+          measureTitleEndpoints();
+          updateScroll();
+        },
+        undefined,
+        () => {
+          curtain3d.style.display = "none";
+          if (flyingTitle) flyingTitle.style.display = "none";
+          heroTargetTitle?.classList.remove("is-awaiting-flight");
+          siteTopbar?.classList.remove("is-curtain-closed");
+          heroBannerReveal.style.opacity = "1";
+          heroBannerReveal.style.transform = "none";
+          heroRealStage?.classList.add("is-landed");
+        }
+      );
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        currentProgress += (targetProgress - currentProgress) * 0.11;
+        curPtrX += (ptrX - curPtrX) * 0.07;
+        curPtrY += (ptrY - curPtrY) * 0.07;
+
+        const tearRaw = Math.min(1, Math.max(0, currentProgress / 0.72));
+        const tearEase = tearRaw < 0.22
+          ? 1.65 * tearRaw * tearRaw
+          : 0.08 + 0.92 * ((tearRaw - 0.22) / 0.78) ** 1.22;
+
+        const sideExitT = Math.min(1, Math.max(0, currentProgress / 0.50));
+        const sideEase = sideExitT * sideExitT * (3 - 2 * sideExitT);
+        const sideAlpha = Math.max(0, 1 - sideExitT * 1.15);
+
+        if (rotiLeftFront) {
+          const lx = -sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
+          const ly = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
+          rotiLeftFront.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${(-sideEase * 8).toFixed(2)}deg)`;
+          rotiLeftFront.style.opacity = sideAlpha.toFixed(3);
+        }
+        if (rotiRightFront) {
+          const rx = sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
+          const ry = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
+          rotiRightFront.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 8).toFixed(2)}deg)`;
+          rotiRightFront.style.opacity = sideAlpha.toFixed(3);
+        }
+
+        if (flyingTitle && heroTargetTitle) {
+          const flightT = Math.min(1, Math.max(0, (currentProgress - 0.08) / 0.60));
+          const easeFlight = flightT < 0.5
+            ? 2 * flightT * flightT
+            : 1 - Math.pow(-2 * flightT + 2, 2) / 2;
+          const fx = titleMetrics.startX + (titleMetrics.endX - titleMetrics.startX) * easeFlight;
+          const fy = titleMetrics.startY + (titleMetrics.endY - titleMetrics.startY) * easeFlight;
+          const fs = titleMetrics.startScale + (1.0 - titleMetrics.startScale) * easeFlight;
+          flyingTitle.style.transform = `translate3d(${fx.toFixed(2)}px, ${fy.toFixed(2)}px, 0) scale(${fs.toFixed(4)})`;
+
+          const docked = flightT >= 0.992;
+          flyingTitle.style.opacity = docked ? "0" : "1";
+          heroTargetTitle.classList.toggle("is-awaiting-flight", !docked);
+        }
+
+        if (modelReady && leftHalf && rightHalf) {
+          const worldSpanHalf = tearEase * 4.55;
+          const localTravel = worldSpanHalf / normScale;
+          leftHalf.position.x = -localTravel;
+          rightHalf.position.x = localTravel;
+
+          const peelYaw = Math.min(0.96, tearRaw * 1.38);
+          const peelRoll = tearEase * 0.22;
+          leftHalf.rotation.y = -peelYaw;
+          rightHalf.rotation.y = peelYaw;
+          leftHalf.rotation.z = peelRoll;
+          rightHalf.rotation.z = -peelRoll;
+
+          pivot.rotation.x = 0.04 + curPtrY * 0.04;
+          pivot.rotation.y = -0.01 + curPtrX * 0.05;
+
+          const showCrumbs = tearRaw > 0.03 && tearRaw < 0.80;
+          crumbParticles.forEach((c) => {
+            c.mesh.visible = showCrumbs;
+            if (showCrumbs) {
+              const ct = tearRaw;
+              c.mesh.position.set(c.vx * ct * 1.5, c.y0 + c.vy * ct * ct * 2.4, c.z0 + 0.35 * ct);
+              c.mesh.rotation.set(c.rx * ct, c.rz * ct, c.rx * 0.5 * ct);
+            }
+          });
+        }
+
+        if (curtain3d) {
+          const bgAlpha = Math.max(0, 1 - Math.min(1, Math.max(0, (currentProgress - 0.16) / 0.34)));
+          curtain3d.style.backgroundColor = `rgba(17, 17, 17, ${bgAlpha.toFixed(3)})`;
+          const canvasAlpha = Math.max(0, 1 - Math.min(1, Math.max(0, (currentProgress - 0.60) / 0.12)));
+          curtain3d.style.opacity = canvasAlpha.toFixed(3);
+          curtain3d.classList.toggle("is-open", currentProgress > 0.42);
+        }
+
+        // Scroll cue meter & text
+        if (tearMeterFill) {
+          tearMeterFill.style.width = `${Math.min(100, Math.round(tearRaw * 100))}%`;
+        }
+        if (tearCueLabel) {
+          tearCueLabel.textContent = tearRaw > 0.12
+            ? "Croissant terobek, membuka Hero Banner..."
+            : "Gulir ke bawah untuk merobek croissant";
+        }
+        tearCue?.classList.toggle("is-hidden", currentProgress > 0.38);
+
+        // Reveal Hero Banner behind the tearing croissant
+        if (heroBannerReveal) {
+          const revealT = Math.min(1, Math.max(0, (currentProgress - 0.18) / 0.48));
+          const easedReveal = 1 - Math.pow(1 - revealT, 2.2);
+          heroBannerReveal.style.opacity = easedReveal.toFixed(3);
+          const s = 0.94 + 0.06 * easedReveal;
+          heroBannerReveal.style.transform = `scale(${s.toFixed(4)})`;
+        }
+
+        // Trigger topbar reveal & real croissants falling from top when landing on Hero Banner!
+        siteTopbar?.classList.toggle("is-curtain-closed", currentProgress < 0.42);
+        if (currentProgress >= 0.46) {
+          heroRealStage?.classList.add("is-landed");
+        } else if (currentProgress < 0.12) {
+          heroRealStage?.classList.remove("is-landed");
+        }
+
+        if (modelReady && currentProgress < 0.86) {
+          renderer.render(scene, camera);
+        }
+      }
+
+      animate();
+    }
+
+    initGiantCroissantCurtain();
+
+    // Classifier UI state & endpoints
+    const CLASS_THUMB_MAP = {
+      Baguette: "/samples/Baguette.jpg",
+      Croissant: "/samples/e5c24fe86c3edf303dd5403a6577a79e3952a501.avif",
+      Cromboloni: "/samples/Cromboloni.webp",
+      Donut: "/samples/Donut.jfif",
+      Hole_Donut: "/samples/HoleDonut.jpg",
+      Pie_Susu: "/samples/PieSUSU.jfif",
+      Pretzel: "/samples/Pretzel.jpg",
+      Sliced_Bread: "/samples/SlicedBread.webp"
+    };
+
+    const CATALOG_DESCRIPTIONS = {
+      Baguette: "Baguette (dibaca: ba-get) adalah roti klasik khas Prancis berbentuk panjang dan ramping seperti tongkat, yang memiliki tekstur kontras berupa kulit luar cokelat keemasan yang garing serta bagian dalam yang lembut, kenyal, dan berongga. Sesuai tradisi dan hukum Prancis, adonan roti ikon budaya yang telah diakui UNESCO ini hanya dibuat dari empat bahan dasar—tepung terigu, air, ragi, dan garam—tanpa tambahan lemak atau gula, sehingga paling nikmat disantap segar pada hari pembuatannya sebagai teman sarapan, isian sandwich, maupun pendamping sup.",
+      Croissant: "Croissant (dibaca: krwa-song) adalah pastri berlapis khas Prancis berbentuk bulan sabit dengan tekstur kulit luar yang garing berlapis (flaky) serta bagian dalam yang lembut dan berongga. Meskipun berakar dari kue tradisional Austria bernama kipferl, pastri yang terbuat dari campuran tepung, ragi, gula, garam, cairan, dan mentega ini disempurnakan di Prancis melalui teknik laminasi—yakni melipat dan menggiling adonan bersama lembaran mentega berkali-kali hingga menghasilkan rongga mirip sarang lebah saat dipanggang—sehingga sangat populer dinikmati polos sebagai teman minum kopi saat sarapan maupun dikreasikan dengan aneka isian manis dan gurih.",
+      Cromboloni: "Cromboloni (atau dikenal juga sebagai New York Roll) adalah pastri modern hasil perpaduan antara croissant khas Prancis dan bomboloni (donat tanpa lubang khas Italia). Pertama kali dipopulerkan pada tahun 2022 di New York, kudapan ini dibuat dari adonan croissant berlapis mentega yang digulung membentuk spiral bulat padat dan dipanggang dalam cetakan cincin logam, sehingga menghasilkan kulit luar yang garing renyah (flaky) dengan bagian dalam yang lembut dan disuntik isian krim melimpah (seperti cokelat, pistachio, atau vanila) serta dihias glasir manis di bagian atasnya.",
+      Donut: "Donut (Tidak Berlubang) atau disebut Bomboloni adalah donat khas Italia berbentuk bulat padat tanpa lubang di tengah yang dibuat dari adonan roti beragi bertekstur empuk dan lembut, lalu digoreng hingga berwarna cokelat keemasan. Berbeda dari donat cincin pada umumnya, kudapan yang namanya berasal dari kata bomba (bom) ini biasanya digulingkan dalam taburan gula halus atau gula pasir, kemudian bagian tengahnya disuntik dengan aneka isian manis yang melimpah seperti krim pastri (custard), cokelat, selai buah, hingga matcha atau tiramisu yang lumer saat digigit.",
+      Hole_Donut: "Hole/ Ring doughnut adalah jenis donat paling ikonik yang memiliki lubang di bagian tengah, terbuat dari adonan tepung terigu, ragi (atau pengembang kue), gula, telur, susu, dan mentega yang digoreng hingga matang keemasan. Lubang di tengahnya berfungsi membantu panas menyebar merata saat proses penggorengan sehingga bagian dalam donat matang sempurna tanpa membuat bagian luarnya gosong, sekaligus menghasilkan tekstur empuk dan lembut yang siap dihias aneka topping seperti glasir gula (glaze), cokelat leleh, meses, atau taburan gula halus.",
+      Pie_Susu: "Pie susu adalah kudapan pastri manis berbentuk bundar pipih yang terdiri dari kulit pai renyah di bagian luar dan isian vla susu (egg custard) yang lembut serta manis di bagian tengahnya. Terinspirasi dari egg tart khas Portugis (pastel de nata) dan Hong Kong (dan tat), kue yang sangat populer sebagai oleh-oleh khas Bali ini dibuat dari kulit pai berbahan tepung terigu, mentega, gula, dan kuning telur, lalu diisi campuran susu kental manis, kuning telur, dan sedikit tepung maizena yang dipanggang hingga kulitnya garing kecokelatan dan permukaan vlanya mengilap mulus.",
+      Pretzel: "Pretzel adalah roti panggang tradisional asal Eropa (khususnya Jerman) berbentuk simpul tali berpilin ikonik yang memiliki kulit luar cokelat mengilap, kenyal, dan gurih dengan bagian dalam yang lembut. Sebelum dipanggang, adonan beragi yang terbuat dari tepung terigu, air, ragi, mentega, dan gula malt ini dicelupkan terlebih dahulu ke dalam larutan alkali (seperti lye atau soda kue) yang memicu reaksi Maillard sehingga menciptakan warna cokelat tua khas serta aroma gurih yang unik, lalu ditaburi garam kasar di atasnya atau dikreasikan dengan aneka rasa manis seperti kayu manis dan cokelat.",
+      Sliced_Bread: "Sliced bread (roti tawar iris) adalah roti berbentuk balok atau lonjong (loaf) yang telah dipotong-potong secara mekanis menjadi lembaran-lembaran tipis dengan ketebalan seragam agar praktis langsung dikonsumsi. Umumnya terbuat dari adonan tepung terigu, air, ragi, garam, serta sedikit gula dan lemak (mentega atau minyak) yang menghasilkan tekstur empuk dan pori-pori halus, produk roti ini pertama kali diperkenalkan secara komersial di Amerika Serikat pada tahun 1928 oleh Otto Frederick Rohwedder dan kini menjadi bahan pokok sarapan di seluruh dunia yang biasa diolesi selai atau mentega, dipanggang (toast), maupun dijadikan roti lapis (sandwich)."
+    };
+
+    const tabUpload = document.getElementById("tabUpload");
+    const tabCamera = document.getElementById("tabCamera");
+    const panelUploadWrap = document.getElementById("panelUploadWrap");
+    const panelCameraWrap = document.getElementById("panelCameraWrap");
+
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const previewSlot = document.getElementById("previewSlot");
+    const clearBtn = document.getElementById("clearBtn");
+    const fileStatus = document.getElementById("fileStatus");
+    const uploadError = document.getElementById("uploadError");
+    const latencyTag = document.getElementById("latencyTag");
+
+    const resultEmpty = document.getElementById("resultEmpty");
+    const resultLoading = document.getElementById("resultLoading");
+    const resultBody = document.getElementById("resultBody");
+    const winnerBox = document.getElementById("winnerBox");
+    const winnerThumb = document.getElementById("winnerThumb");
+    const winnerKicker = document.getElementById("winnerKicker");
+    const winnerName = document.getElementById("winnerName");
+    const winnerBar = document.getElementById("winnerBar");
+    const winnerPct = document.getElementById("winnerPct");
+    const unclassifiedBox = document.getElementById("unclassifiedBox");
+    const unclassifiedText = document.getElementById("unclassifiedText");
+    const top3Label = document.getElementById("top3Label");
+    const top3List = document.getElementById("top3List");
+
+    let activePreviewUrl = null;
+
+    function showUploadError(msg) {
+      if (!msg) {
+        uploadError.textContent = "";
+        uploadError.classList.remove("is-visible");
+        return;
+      }
+      uploadError.textContent = msg;
+      uploadError.classList.add("is-visible");
+    }
+
+    function setUploadState(state) {
+      resultEmpty.style.display = state === "empty" ? "flex" : "none";
+      resultLoading.style.display = state === "loading" ? "block" : "none";
+      resultBody.style.display = state === "done" ? "flex" : "none";
+    }
+
+    function clearUpload() {
+      fileInput.value = "";
+      if (activePreviewUrl) {
+        URL.revokeObjectURL(activePreviewUrl);
+        activePreviewUrl = null;
+      }
+      previewSlot.replaceChildren();
+      dropzone.classList.remove("has-image");
+      fileStatus.textContent = "Belum ada file";
+      fileStatus.classList.remove("is-ok", "is-warn");
+      latencyTag.textContent = "Menunggu";
+      showUploadError("");
+      setUploadState("empty");
+    }
+
+    clearBtn.addEventListener("click", clearUpload);
+
+    function formatLabel(name) {
+      return String(name || "").replace(/_/g, " ");
+    }
+
+    function renderPrediction(data) {
+      setUploadState("done");
+      latencyTag.textContent = `${data.inference_time_ms} ms`;
+
+      const top = data.prediction || { class: "-", confidence: 0 };
+      const recognized = data.is_recognized !== false;
+
+      winnerThumb.replaceChildren();
+      if (recognized && CLASS_THUMB_MAP[top.class]) {
+        const thumbImg = document.createElement("img");
+        thumbImg.src = CLASS_THUMB_MAP[top.class];
+        thumbImg.alt = formatLabel(top.class);
+        thumbImg.width = 960;
+        thumbImg.height = 720;
+        winnerThumb.appendChild(thumbImg);
+      } else {
+        winnerThumb.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dda85f" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.8.9c0 1.6-2.3 2-2.3 3.4" stroke-linecap="round"/><circle cx="12" cy="17" r="0.8" fill="#dda85f"/></svg>`;
+      }
+
+      winnerBox.classList.toggle("is-unclassified", !recognized);
+      fileStatus.classList.toggle("is-ok", recognized);
+      fileStatus.classList.toggle("is-warn", !recognized);
+
+      if (recognized) {
+        winnerKicker.textContent = "Teridentifikasi sebagai kelas terlatih";
+        winnerName.textContent = formatLabel(top.class);
+        unclassifiedBox.style.display = "none";
+        top3Label.textContent = "Tiga Kelas Teratas";
+      } else {
+        winnerKicker.textContent = "Di luar delapan kategori";
+        winnerName.textContent = "Tidak Terklasifikasi";
+        const baseMsg = data.message ? `${data.message} ` : "";
+        unclassifiedText.textContent = `${baseMsg}Skor tertinggi (${top.confidence}%) berada di bawah ambang batas ${data.threshold || 32}%. Nantinya cadangan API LLM Vision akan membantu menjelaskan kemungkinan objek ini.`;
+        unclassifiedBox.style.display = "block";
+        top3Label.textContent = "Kemiripan Terdekat (Di Bawah Ambang Batas)";
+      }
+
+      winnerPct.textContent = `${top.confidence}%`;
+      requestAnimationFrame(() => {
+        winnerBar.style.width = `${Math.min(100, Math.max(0, top.confidence))}%`;
+      });
+
+      top3List.replaceChildren();
+      (data.top3 || []).forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "top3-row";
+
+        const labelEl = document.createElement("span");
+        labelEl.textContent = formatLabel(item.class);
+
+        const track = document.createElement("div");
+        track.className = "bar-track";
+        const fill = document.createElement("div");
+        fill.className = "bar-fill";
+        fill.style.width = `${Math.min(100, Math.max(0, item.confidence))}%`;
+        track.appendChild(fill);
+
+        const pctEl = document.createElement("span");
+        pctEl.className = "bar-val tabular";
+        pctEl.textContent = `${item.confidence}%`;
+
+        row.append(labelEl, track, pctEl);
+        top3List.appendChild(row);
+      });
+    }
+
+    async function handleFile(file) {
+      if (!file || !file.type.startsWith("image/")) {
+        showUploadError("Pilih file gambar dengan format JPG, PNG, atau WEBP.");
+        return;
+      }
+
+      showUploadError("");
+      if (activePreviewUrl) URL.revokeObjectURL(activePreviewUrl);
+      activePreviewUrl = URL.createObjectURL(file);
+
+      const previewImg = document.createElement("img");
+      previewImg.src = activePreviewUrl;
+      previewImg.alt = `Pratinjau ${file.name}`;
+      previewSlot.replaceChildren(previewImg);
+      dropzone.classList.add("has-image");
+
+      fileStatus.textContent = file.name.length > 26 ? `${file.name.slice(0, 23)}...` : file.name;
+      fileStatus.classList.remove("is-ok", "is-warn");
+      setUploadState("loading");
+      latencyTag.textContent = "Memproses";
+
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/predict", { method: "POST", body: fd });
+        if (!res.ok) {
+          throw new Error(`Permintaan ditolak server (${res.status}).`);
+        }
+        const data = await res.json();
+        renderPrediction(data);
+      } catch (err) {
+        setUploadState("empty");
+        latencyTag.textContent = "Gagal";
+        showUploadError(err.message || "Gagal menghubungi server inferensi.");
+      }
+    }
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files?.[0]) handleFile(fileInput.files[0]);
+    });
+
+    ["dragenter", "dragover"].forEach((ev) => {
+      dropzone.addEventListener(ev, (e) => {
+        e.preventDefault();
+        dropzone.classList.add("is-dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((ev) => {
+      dropzone.addEventListener(ev, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("is-dragover");
+      });
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      const f = e.dataTransfer?.files?.[0];
+      if (f) handleFile(f);
+    });
+
+    // Camera mode
+    const cameraVideo = document.getElementById("cameraVideo");
+    const cameraGuide = document.getElementById("cameraGuide");
+    const cameraHud = document.getElementById("cameraHud");
+    const cameraIdle = document.getElementById("cameraIdle");
+    const hudDot = document.getElementById("hudDot");
+    const hudClass = document.getElementById("hudClass");
+    const hudBar = document.getElementById("hudBar");
+    const hudPct = document.getElementById("hudPct");
+    const cameraError = document.getElementById("cameraError");
+    const startCamBtn = document.getElementById("startCamBtn");
+    const switchCamBtn = document.getElementById("switchCamBtn");
+    const camStateDot = document.getElementById("camStateDot");
+    const camStateText = document.getElementById("camStateText");
+
+    let camStream = null;
+    let camTimer = null;
+    let camBusy = false;
+    let facingMode = "environment";
+    const captureCanvas = document.createElement("canvas");
+    captureCanvas.width = 224;
+    captureCanvas.height = 224;
+
+    function showCameraError(msg) {
+      if (!msg) {
+        cameraError.textContent = "";
+        cameraError.classList.remove("is-visible");
+        return;
+      }
+      cameraError.textContent = msg;
+      cameraError.classList.add("is-visible");
+    }
+
+    function stopCamera() {
+      if (camTimer) {
+        clearInterval(camTimer);
+        camTimer = null;
+      }
+      if (camStream) {
+        camStream.getTracks().forEach((t) => t.stop());
+        camStream = null;
+      }
+      cameraVideo.srcObject = null;
+      cameraVideo.style.display = "none";
+      cameraGuide.style.display = "none";
+      cameraHud.style.display = "none";
+      cameraIdle.style.display = "flex";
+      startCamBtn.textContent = "Mulai Kamera";
+      camStateDot.className = "dot-indicator";
+      camStateText.textContent = "Berhenti";
+    }
+
+    async function captureAndPredict() {
+      if (!camStream || camBusy || cameraVideo.readyState < 2) return;
+      camBusy = true;
+
+      try {
+        const vw = cameraVideo.videoWidth;
+        const vh = cameraVideo.videoHeight;
+        const side = Math.min(vw, vh) * 0.56;
+        const sx = (vw - side) / 2;
+        const sy = (vh - side) / 2;
+        const ctx = captureCanvas.getContext("2d");
+        ctx.drawImage(cameraVideo, sx, sy, side, side, 0, 0, 224, 224);
+
+        const dataUrl = captureCanvas.toDataURL("image/jpeg", 0.82);
+        const res = await fetch("/api/predict-frame", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_base64: dataUrl })
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const top = data.prediction || { class: "-", confidence: 0 };
+        const recognized = data.is_recognized !== false;
+
+        cameraHud.style.display = "flex";
+        if (recognized) {
+          hudDot.className = "dot-indicator is-live";
+          hudClass.textContent = formatLabel(top.class);
+          hudBar.style.width = `${Math.min(100, top.confidence)}%`;
+          hudBar.style.background = "var(--accent-strong)";
+          hudPct.textContent = `${top.confidence}%`;
+        } else {
+          hudDot.className = "dot-indicator is-warn";
+          hudClass.textContent = "Tidak mendeteksi roti";
+          hudBar.style.width = `${Math.min(100, top.confidence)}%`;
+          hudBar.style.background = "var(--warn)";
+          hudPct.textContent = "Di bawah 40%";
+        }
+      } catch {
+        // Skip single dropped frame quietly
+      } finally {
+        camBusy = false;
+      }
+    }
+
+    async function startCamera() {
+      showCameraError("");
+      if (!navigator.mediaDevices?.getUserMedia) {
+        showCameraError("Perangkat atau peramban ini tidak mendukung akses kamera.");
+        return;
+      }
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        cameraVideo.srcObject = camStream;
+        cameraVideo.style.display = "block";
+        cameraGuide.style.display = "block";
+        cameraIdle.style.display = "none";
+        startCamBtn.textContent = "Hentikan Kamera";
+        camStateDot.className = "dot-indicator is-live";
+        camStateText.textContent = "Aktif (~350 ms)";
+        camTimer = setInterval(captureAndPredict, 350);
+      } catch (err) {
+        showCameraError(`Izin kamera ditolak atau perangkat tidak ditemukan (${err.message}).`);
+      }
+    }
+
+    startCamBtn.addEventListener("click", () => {
+      if (camStream) stopCamera();
+      else startCamera();
+    });
+
+    switchCamBtn.addEventListener("click", () => {
+      facingMode = facingMode === "environment" ? "user" : "environment";
+      if (camStream) {
+        stopCamera();
+        startCamera();
+      }
+    });
+
+    function switchMode(mode) {
+      const isUpload = mode === "upload";
+      tabUpload.setAttribute("aria-selected", String(isUpload));
+      tabCamera.setAttribute("aria-selected", String(!isUpload));
+      panelUploadWrap.style.display = isUpload ? "grid" : "none";
+      panelCameraWrap.classList.toggle("is-active", !isUpload);
+      if (isUpload) stopCamera();
+    }
+
+    tabUpload.addEventListener("click", () => switchMode("upload"));
+    tabCamera.addEventListener("click", () => switchMode("camera"));
+
+    // Interactive Dark-Room 8-Class Gallery
+    const catalogItems = Array.from(document.querySelectorAll(".catalog-item"));
+    const specimenImg = document.getElementById("specimenImg");
+    const specimenTitle = document.getElementById("specimenTitle");
+    const specimenCode = document.getElementById("specimenCode");
+    const specimenDetail = document.getElementById("specimenDetail");
+    const specimenFrame = specimenImg.closest(".specimen-frame");
+    const specimenCaption = specimenTitle.closest(".specimen-caption");
+
+    function replayCatalogEntry(element) {
+      element.classList.remove("is-entering");
+      void element.offsetWidth;
+      element.classList.add("is-entering");
+    }
+
+    const catalogRevealTargets = [...catalogItems, document.querySelector(".catalog-sticky")];
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      catalogRevealTargets.forEach((element) => element.classList.add("is-entering"));
+    } else {
+      const catalogRevealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-entering");
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.12 });
+      catalogRevealTargets.forEach((element) => catalogRevealObserver.observe(element));
+    }
+
+    function activateCatalogItem(btn, index) {
+      const cls = btn.dataset.class;
+      if (!cls || btn.getAttribute("aria-pressed") === "true") return;
+      catalogItems.forEach((el) => el.setAttribute("aria-pressed", String(el === btn)));
+      specimenImg.src = CLASS_THUMB_MAP[cls];
+      specimenImg.alt = `Pratinjau kelas ${formatLabel(cls)}`;
+      specimenTitle.textContent = formatLabel(cls);
+      specimenCode.textContent = `Kelas ${index + 1} dari 8`;
+      specimenDetail.textContent = CATALOG_DESCRIPTIONS[cls];
+      replayCatalogEntry(specimenFrame);
+      replayCatalogEntry(specimenCaption);
+      replayCatalogEntry(specimenDetail);
+    }
+
+    catalogItems.forEach((btn, idx) => {
+      btn.addEventListener("click", () => activateCatalogItem(btn, idx));
+      btn.addEventListener("mouseenter", () => activateCatalogItem(btn, idx));
+      btn.addEventListener("focus", () => activateCatalogItem(btn, idx));
+    });
+
+    // GSAP SplitText + ScrollTrigger: semua teks muncul per kata saat discroll
+    function initWordScrollReveal() {
+      const gsapLib = window.gsap;
+      const ScrollTriggerLib = window.ScrollTrigger;
+      const SplitTextLib = window.SplitText;
+      if (!gsapLib || !ScrollTriggerLib || !SplitTextLib) return;
+
+      gsapLib.registerPlugin(ScrollTriggerLib, SplitTextLib);
+
+      const mm = gsapLib.matchMedia();
+      mm.add(
+        {
+          isMotion: "(prefers-reduced-motion: no-preference)",
+          reduceMotion: "(prefers-reduced-motion: reduce)"
+        },
+        (context) => {
+          const { reduceMotion: prefersReduced } = context.conditions;
+          if (prefersReduced) return;
+
+          const textTargets = Array.from(document.querySelectorAll([
+            "#tearCueLabel",
+            ".hero-lead",
+            ".section-title",
+            ".section-sub",
+            ".panel-title",
+            ".drop-title",
+            ".drop-hint",
+            ".result-placeholder strong",
+            ".result-placeholder p",
+            ".camera-idle strong",
+            ".camera-idle p",
+            ".catalog-name",
+            ".catalog-desc",
+            ".specimen-title",
+            ".specimen-code",
+            ".note-block h3",
+            ".note-block p",
+            ".footer-meta"
+          ].join(","))).filter((el) => el.textContent && el.textContent.trim().length > 0);
+
+          textTargets.forEach((el) => {
+            if (el.dataset.splitReady === "1") return;
+            el.dataset.splitReady = "1";
+
+            const inCatalogButton = el.closest(".catalog-item");
+            if (inCatalogButton && !inCatalogButton.getAttribute("aria-label")) {
+              const name = inCatalogButton.querySelector(".catalog-name")?.textContent?.trim() || "";
+              const desc = inCatalogButton.querySelector(".catalog-desc")?.textContent?.trim() || "";
+              inCatalogButton.setAttribute("aria-label", `${name}. ${desc}`.trim());
+            }
+
+            SplitTextLib.create(el, {
+              type: "words",
+              wordsClass: "split-word",
+              mask: "words",
+              aria: inCatalogButton ? "hidden" : "auto",
+              autoSplit: true,
+              onSplit(self) {
+                gsapLib.set(self.words, { yPercent: 115, autoAlpha: 0 });
+                return gsapLib.to(self.words, {
+                  yPercent: 0,
+                  autoAlpha: 1,
+                  duration: 0.58,
+                  ease: "power3.out",
+                  stagger: { each: 0.035, from: "start" },
+                  scrollTrigger: {
+                    trigger: el,
+                    start: "top 90%",
+                    toggleActions: "play none none none",
+                    once: true
+                  }
+                });
+              }
+            });
+          });
+
+          requestAnimationFrame(() => ScrollTriggerLib.refresh());
+        }
+      );
+    }
+
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(initWordScrollReveal).catch(initWordScrollReveal);
+    } else {
+      initWordScrollReveal();
+    }
+  </script>
+</body>
+</html>

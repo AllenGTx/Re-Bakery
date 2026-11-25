@@ -1,0 +1,48 @@
+{
+  "classes": [
+    "Baguette",
+    "Croissant",
+    "Cromboloni",
+    "Donut",
+    "Hole_Donut",
+    "Pie_Susu",
+    "Pretzel",
+    "Sliced_Bread"
+  ],
+  "class_to_idx": {
+    "Baguette": 0,
+    "Croissant": 1,
+    "Cromboloni": 2,
+    "Donut": 3,
+    "Hole_Donut": 4,
+    "Pie_Susu": 5,
+    "Pretzel": 6,
+    "Sliced_Bread": 7
+  },
+  "idx_to_class": {
+    "0": "Baguette",
+    "1": "Croissant",
+    "2": "Cromboloni",
+    "3": "Donut",
+    "4": "Hole_Donut",
+    "5": "Pie_Susu",
+    "6": "Pretzel",
+    "7": "Sliced_Bread"
+  },
+  "emoji": {
+    "Baguette": "🥖",
+    "Croissant": "🥐",
+    "Cromboloni": "🌀",
+    "Donut": "🍩",
+    "Hole_Donut": "⭕",
+    "Pie_Susu": "🥧",
+    "Pretzel": "🥨",
+    "Sliced_Bread": "🍞"
+  },
+  "model_info": {
+    "architecture": "convnext_tiny.fb_in22k_ft_in1k",
+    "image_size": 224,
+    "test_acc": 0.9747,
+    "best_val_acc": 0.9605
+  }
+}

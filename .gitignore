@@ -1,0 +1,10 @@
+Dataset/
+Dataset.zip
+**/__pycache__/
+*.pyc
+venv/
+.venv/
+.vercel/
+.taste-skill/
+.env
+.env.*
