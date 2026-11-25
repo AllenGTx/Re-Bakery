@@ -255,7 +255,7 @@
       will-change: transform, opacity;
     }
 
-    /* Unified Photorealistic Bakery Backdrop: unzoomed natural aspect ratio, placed below title */
+    /* Unified Photorealistic Bakery Backdrop: unzoomed natural aspect ratio on PC, hidden on mobile */
     .splash-unified-backdrop {
       position: absolute;
       left: 50%;
@@ -274,13 +274,73 @@
       transition: opacity 220ms var(--ease-out);
     }
 
+    /* Mobile Layer: Wooden Kitchen Workbench + Dedicated Vertical V-Wings (78582c2) */
+    .kitchen-table-layer {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      z-index: 14;
+      pointer-events: none;
+      opacity: 0.98;
+      filter: brightness(0.90) contrast(1.04);
+      will-change: transform, opacity;
+    }
+
+    .roti-mound {
+      display: none;
+      position: absolute;
+      z-index: 17;
+      height: auto;
+      pointer-events: none;
+      filter: brightness(0.92) contrast(1.03) drop-shadow(0 16px 20px rgba(5, 3, 1, 0.85));
+      will-change: transform, opacity;
+    }
+
     @media (max-width: 768px) {
       .splash-unified-backdrop {
-        width: 100vw;
-        max-width: none;
-        height: 72svh;
-        object-fit: contain;
+        display: none !important;
+      }
+
+      .kitchen-table-layer {
+        display: block;
+        min-width: 0;
+        width: 118vw;
+        height: 26svh;
+        bottom: 0;
+        object-fit: cover;
         object-position: center bottom;
+        transform: translate3d(-50%, 0, 0);
+      }
+
+      .roti-mound.roti-mobile-wing {
+        display: block;
+        z-index: 17;
+      }
+
+      .roti-mound.roti-mobile-left {
+        left: -2vw;
+        bottom: 19.5svh;
+        width: 56vw;
+        max-height: 58svh;
+        object-fit: contain;
+        object-position: left bottom;
+      }
+
+      .roti-mound.roti-mobile-right {
+        right: -2vw;
+        bottom: 19.5svh;
+        width: 58vw;
+        max-height: 55svh;
+        object-fit: contain;
+        object-position: right bottom;
+      }
+
+      .croissant-contact-shadow {
+        left: 50% !important;
+        width: 88vw !important;
+        height: 46px !important;
+        bottom: 17.5svh !important;
       }
     }
 
@@ -1257,7 +1317,7 @@
     }
 
     @media (max-width: 768px) {
-      /* Hide wide PC wings on mobile; show tall portrait V-wings matching Red & Yellow lines */
+      /* Hide wide PC wings on mobile; show tall portrait V-wings matching Red & Yellow lines (78582c2) */
       .roti-mound.roti-pc-wing {
         display: none;
       }
@@ -1269,7 +1329,7 @@
 
       .roti-mound.roti-mobile-left {
         left: -2vw;
-        bottom: 16.5svh;
+        bottom: 19.5svh;
         width: 56vw;
         max-height: 58svh;
         object-fit: contain;
@@ -1278,7 +1338,7 @@
 
       .roti-mound.roti-mobile-right {
         right: -2vw;
-        bottom: 16.5svh;
+        bottom: 19.5svh;
         width: 58vw;
         max-height: 55svh;
         object-fit: contain;
@@ -1289,14 +1349,10 @@
         left: 50%;
         width: 88vw;
         height: 46px;
-        bottom: 10.5svh;
+        bottom: 17.5svh;
       }
 
-      .kitchen-table-pc {
-        display: none;
-      }
-
-      .kitchen-table-mobile {
+      .kitchen-table-layer {
         display: block;
         min-width: 0;
         width: 118vw;
@@ -1487,6 +1543,9 @@
         <div class="curtain-3d" id="curtain3d" aria-hidden="true">
           <div class="curtain-bg" id="curtainBg"></div>
           <img class="splash-unified-backdrop" id="splashBackdrop" src="/static/assets/intro/splash_backdrop.webp?v=1" alt="" width="1920" height="1080" fetchpriority="high" decoding="async" />
+          <img class="kitchen-table-layer" id="kitchenTable" src="/static/assets/intro/kitchen_table.webp?v=2" alt="" width="1600" height="554" decoding="async" />
+          <img class="roti-mound roti-mobile-wing roti-mobile-left" id="rotiLeftMobile" src="/static/assets/intro/roti_mobile_left.webp?v=2" alt="" width="559" height="1080" decoding="async" />
+          <img class="roti-mound roti-mobile-wing roti-mobile-right" id="rotiRightMobile" src="/static/assets/intro/roti_mobile_right.webp?v=2" alt="" width="652" height="1020" decoding="async" />
           <div class="croissant-contact-shadow" id="croissantShadow"></div>
           <canvas id="croissantCanvas"></canvas>
           <div class="tear-cue" id="tearCue">
@@ -1758,6 +1817,9 @@
     const curtain3d = document.getElementById("curtain3d");
     const curtainBg = document.getElementById("curtainBg");
     const splashBackdrop = document.getElementById("splashBackdrop");
+    const kitchenTable = document.getElementById("kitchenTable");
+    const rotiLeftMobile = document.getElementById("rotiLeftMobile");
+    const rotiRightMobile = document.getElementById("rotiRightMobile");
     const croissantShadow = document.getElementById("croissantShadow");
     const heroCanvas = document.getElementById("croissantCanvas");
     const flyingTitle = document.getElementById("flyingTitle");
@@ -1925,15 +1987,15 @@
         const vFovRad = (camera.fov * Math.PI) / 180;
         
         if (aspect < 0.85) {
-          // Versi Mobile / HP: Revert exact configuration as approved by user
-          // (desiredWorldWidth 4.10, camZ calculated, pivot.scale 1.0, pivotY = -halfWorldH * 0.54)
+          // Versi Mobile / HP: Revert exact configuration as approved in 78582c2
+          // (desiredWorldWidth 4.10, camZ calculated, pivot.scale 1.0, pivotY = -halfWorldH * 0.39)
           const desiredWorldWidth = 4.10;
           const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
-          const camZ = Math.max(8.25, distForWidth);
+          const camZ = Math.max(6.45, distForWidth);
           camera.position.set(0, 0.04, camZ);
           const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
           pivot.scale.setScalar(1.0);
-          pivot.position.set(0, -halfWorldH * 0.54, 0);
+          pivot.position.set(0, -halfWorldH * 0.39, 0);
         } else {
           // Versi PC / Desktop:
           // camZ 8.0, pivot scale 0.70 (70% size)
@@ -2063,17 +2125,38 @@
         const sideAlpha = Math.max(0, 1 - sideExitT * 1.15);
         const isMobileView = window.innerWidth <= 768;
 
-        // Splash animation: smooth slide downwards on scroll
-        if (splashBackdrop) {
-          const dropY = sideEase * (isMobileView ? 280 : 380) + curPtrY * 6 * (1 - sideExitT);
-          splashBackdrop.style.transform = `translate3d(-50%, ${dropY.toFixed(1)}px, 0)`;
-          splashBackdrop.style.opacity = sideAlpha.toFixed(3);
+        // On PC: Splash backdrop slides downwards on scroll
+        // On Mobile: Kitchen table drops, and mobile V-wings separate cleanly outward (78582c2)
+        if (isMobileView) {
+          if (kitchenTable) {
+            const tableDrop = sideEase * 150;
+            kitchenTable.style.transform = `translate3d(-50%, ${tableDrop.toFixed(1)}px, 0)`;
+            kitchenTable.style.opacity = (sideAlpha * 0.96).toFixed(3);
+          }
+          const lx = -sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
+          const rx = sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
+          const ly = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
+          const ry = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
+          if (rotiLeftMobile) {
+            rotiLeftMobile.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${(-sideEase * 5).toFixed(2)}deg)`;
+            rotiLeftMobile.style.opacity = sideAlpha.toFixed(3);
+          }
+          if (rotiRightMobile) {
+            rotiRightMobile.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 5).toFixed(2)}deg)`;
+            rotiRightMobile.style.opacity = sideAlpha.toFixed(3);
+          }
+        } else {
+          if (splashBackdrop) {
+            const dropY = sideEase * 380 + curPtrY * 6 * (1 - sideExitT);
+            splashBackdrop.style.transform = `translate3d(-50%, ${dropY.toFixed(1)}px, 0)`;
+            splashBackdrop.style.opacity = sideAlpha.toFixed(3);
+          }
         }
 
         if (croissantShadow) {
           const shadowAlpha = Math.max(0, 1 - tearRaw * 2.2);
           const shadowScale = 1 + tearEase * 0.25;
-          const shadowDrop = sideEase * 220;
+          const shadowDrop = isMobileView ? 0 : sideEase * 220;
           croissantShadow.style.transform = `translate3d(-50%, ${shadowDrop.toFixed(1)}px, 0) scale(${shadowScale.toFixed(3)})`;
           croissantShadow.style.opacity = shadowAlpha.toFixed(3);
         }
