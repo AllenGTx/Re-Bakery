@@ -1084,54 +1084,6 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: opacity var(--t-med) var(--ease-out);
-    }
-
-    @keyframes catalog-enter {
-      from {
-        opacity: 0;
-        transform: translateY(22px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes specimen-image-enter {
-      from {
-        opacity: 0;
-        transform: scale(1.035);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes specimen-text-enter {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    #katalog .catalog-item.is-entering,
-    #katalog .catalog-sticky.is-entering {
-      animation: catalog-enter 650ms var(--ease-out) both;
-    }
-
-    #katalog .specimen-frame.is-entering img {
-      animation: specimen-image-enter 560ms var(--ease-out) both;
-    }
-
-    #katalog .specimen-caption.is-entering,
-    #katalog .specimen-detail.is-entering {
-      animation: specimen-text-enter 480ms var(--ease-out) both;
     }
 
     .specimen-caption {
@@ -1390,13 +1342,6 @@
         will-change: auto;
       }
 
-      #katalog .catalog-item.is-entering,
-      #katalog .catalog-sticky.is-entering,
-      #katalog .specimen-frame.is-entering img,
-      #katalog .specimen-caption.is-entering,
-      #katalog .specimen-detail.is-entering {
-        animation: none;
-      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
@@ -2412,27 +2357,9 @@
     const specimenCode = document.getElementById("specimenCode");
     const specimenDetail = document.getElementById("specimenDetail");
     const specimenFrame = specimenImg.closest(".specimen-frame");
-    const specimenCaption = specimenTitle.closest(".specimen-caption");
-
-    function replayCatalogEntry(element) {
-      element.classList.remove("is-entering");
-      void element.offsetWidth;
-      element.classList.add("is-entering");
-    }
-
-    const catalogRevealTargets = [...catalogItems, document.querySelector(".catalog-sticky")];
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
-      catalogRevealTargets.forEach((element) => element.classList.add("is-entering"));
-    } else {
-      const catalogRevealObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-entering");
-          observer.unobserve(entry.target);
-        });
-      }, { threshold: 0.12 });
-      catalogRevealTargets.forEach((element) => catalogRevealObserver.observe(element));
-    }
+    let resetSpecimenDetailReveal = () => {};
+    let refreshSpecimenDetailReveal = () => {};
+    let replaySpecimenImage = () => {};
 
     function activateCatalogItem(btn, index) {
       const cls = btn.dataset.class;
@@ -2442,10 +2369,10 @@
       specimenImg.alt = `Pratinjau kelas ${formatLabel(cls)}`;
       specimenTitle.textContent = formatLabel(cls);
       specimenCode.textContent = `Kelas ${index + 1} dari 8`;
+      resetSpecimenDetailReveal();
       specimenDetail.textContent = CATALOG_DESCRIPTIONS[cls];
-      replayCatalogEntry(specimenFrame);
-      replayCatalogEntry(specimenCaption);
-      replayCatalogEntry(specimenDetail);
+      refreshSpecimenDetailReveal();
+      replaySpecimenImage();
     }
 
     catalogItems.forEach((btn, idx) => {
@@ -2472,6 +2399,48 @@
         (context) => {
           const { reduceMotion: prefersReduced } = context.conditions;
           if (prefersReduced) return;
+
+          const catalogThumbs = Array.from(document.querySelectorAll(".catalog-thumb"));
+          catalogThumbs.forEach((thumb) => {
+            gsapLib.from(thumb, {
+              y: 22,
+              autoAlpha: 0,
+              duration: 0.65,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: thumb,
+                start: "top 90%",
+                toggleActions: "play none none none",
+                once: true
+              }
+            });
+          });
+
+          gsapLib.from(specimenImg, {
+            scale: 1.035,
+            autoAlpha: 0,
+            duration: 0.7,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: specimenFrame,
+              start: "top 90%",
+              toggleActions: "play none none none",
+              once: true
+            }
+          });
+
+          replaySpecimenImage = () => {
+            gsapLib.fromTo(specimenImg,
+              { scale: 1.035, autoAlpha: 0.4 },
+              {
+                scale: 1,
+                autoAlpha: 1,
+                duration: 0.56,
+                ease: "power3.out",
+                overwrite: true
+              }
+            );
+          };
 
           const textTargets = Array.from(document.querySelectorAll([
             "#tearCueLabel",
@@ -2529,6 +2498,38 @@
               }
             });
           });
+
+          let specimenDetailSplit;
+          resetSpecimenDetailReveal = () => {
+            specimenDetailSplit?.revert();
+            specimenDetailSplit = undefined;
+          };
+          refreshSpecimenDetailReveal = () => {
+            specimenDetailSplit = SplitTextLib.create(specimenDetail, {
+              type: "words",
+              wordsClass: "split-word",
+              mask: "words",
+              aria: "auto",
+              autoSplit: true,
+              onSplit(self) {
+                gsapLib.set(self.words, { yPercent: 115, autoAlpha: 0 });
+                return gsapLib.to(self.words, {
+                  yPercent: 0,
+                  autoAlpha: 1,
+                  duration: 0.58,
+                  ease: "power3.out",
+                  stagger: { each: 0.035, from: "start" },
+                  scrollTrigger: {
+                    trigger: specimenDetail,
+                    start: "top 90%",
+                    toggleActions: "play none none none",
+                    once: true
+                  }
+                });
+              }
+            });
+          };
+          refreshSpecimenDetailReveal();
 
           requestAnimationFrame(() => ScrollTriggerLib.refresh());
         }
