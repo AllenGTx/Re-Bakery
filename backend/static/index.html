@@ -208,7 +208,7 @@
       background: var(--bg);
     }
 
-    /* Foreground Layer: Giant 3D Croissant + Asymmetric V-Mounds + Wooden Kitchen Table */
+    /* Curtain Stage */
     .curtain-3d {
       position: absolute;
       inset: 0;
@@ -219,49 +219,28 @@
       justify-content: center;
       pointer-events: auto;
       transition: opacity 220ms var(--ease-out);
+      overflow: hidden;
     }
 
     .curtain-bg {
       position: absolute;
       inset: 0;
       z-index: 10;
-      background: var(--bg);
-      pointer-events: none;
+      will-change: transform, opacity;
     }
 
     .curtain-3d.is-open {
       pointer-events: none;
     }
 
-    .kitchen-table-layer {
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      z-index: 14;
-      width: 100vw;
-      min-width: 1180px;
-      height: clamp(275px, 36.5svh, 355px);
-      object-fit: cover;
-      object-position: center bottom;
-      transform: translate3d(-50%, 0, 0);
-      pointer-events: none;
-      opacity: 0.99;
-      filter: brightness(0.92) contrast(1.04);
-      will-change: transform, opacity;
-    }
-
-    .kitchen-table-mobile {
-      display: none;
-    }
-
     /* Grounding contact shadow directly beneath the Giant Croissant onto the wooden workbench */
     .croissant-contact-shadow {
       position: absolute;
       left: 50%;
-      bottom: clamp(100px, 14.5svh, 150px);
+      bottom: clamp(60px, 8.5svh, 95px);
       z-index: 21;
-      width: min(34vw, 440px);
-      height: clamp(30px, 4.5svh, 44px);
+      width: min(32vw, 400px);
+      height: clamp(26px, 3.8svh, 38px);
       transform: translate3d(-50%, 0, 0);
       border-radius: 50%;
       background: radial-gradient(
@@ -271,58 +250,21 @@
         rgba(8, 5, 2, 0.28) 76%,
         transparent 100%
       );
-      filter: blur(9px);
+      filter: blur(8px);
       pointer-events: none;
       will-change: transform, opacity;
     }
 
-    .roti-mound {
-      position: absolute;
-      z-index: 17;
-      height: auto;
-      pointer-events: none;
-      filter: brightness(0.93) contrast(1.03) drop-shadow(0 14px 18px rgba(5, 3, 1, 0.82));
-      will-change: transform, opacity;
-    }
-
-    /* PC Photorealistic V-Wings: flush mojok at outer walls, anchored on open back wood completely above foreground tools */
-    .roti-mound.roti-v-left {
-      left: -0.4vw;
-      width: min(55vw, 88svh);
-      bottom: clamp(134px, 18.2svh, 178px);
-      transform: translate3d(0, 0, 0);
-    }
-
-    .roti-mound.roti-v-right {
-      right: -0.4vw;
-      width: min(58vw, 92svh);
-      bottom: clamp(134px, 18.2svh, 178px);
-      transform: translate3d(0, 0, 0);
-    }
-
-    .roti-mound.roti-center-stand {
-      left: 50%;
-      bottom: clamp(140px, 18.8svh, 185px);
-      width: min(28vw, 440px);
-      transform: translate3d(-50%, 0, 0);
-      z-index: 15;
-    }
-
-    /* Dedicated Mobile Portrait Tall V-Wings (hidden on PC) */
-    .roti-mound.roti-mobile-wing {
-      display: none;
-    }
-
-    /* Unified Photorealistic Bakery Backdrop (Full edge-to-edge coverage, no empty sides) */
+    /* Unified Photorealistic Bakery Backdrop: unzoomed natural aspect ratio, placed below title */
     .splash-unified-backdrop {
       position: absolute;
       left: 50%;
       bottom: 0;
       width: 100vw;
-      min-width: 100vw;
-      height: 100svh;
-      max-height: 100svh;
-      object-fit: cover;
+      max-width: 1720px;
+      height: 84svh;
+      max-height: 880px;
+      object-fit: contain;
       object-position: center bottom;
       transform: translate3d(-50%, 0, 0);
       z-index: 16;
@@ -335,9 +277,9 @@
     @media (max-width: 768px) {
       .splash-unified-backdrop {
         width: 100vw;
-        min-width: 0;
-        height: 80svh;
-        object-fit: cover;
+        max-width: none;
+        height: 72svh;
+        object-fit: contain;
         object-position: center bottom;
       }
     }
@@ -357,6 +299,7 @@
     }
 
     /* Re:Bakery title starts centered above Giant Croissant, flies cleanly to Hero Banner h1 on scroll */
+    /* Re:Bakery title centered cleanly above the picture, flies to hero on scroll */
     .flying-brand-title {
       position: absolute;
       top: 0;
@@ -1946,7 +1889,7 @@
       let curPtrX = 0;
       let curPtrY = 0;
       let modelReady = false;
-      let titleMetrics = { startX: 0, startY: 72, endX: 56, endY: 320, startScale: 1.08 };
+      let titleMetrics = { startX: 0, startY: 52, endX: 56, endY: 320, startScale: 1.08 };
 
       function measureTitleEndpoints() {
         if (!flyingTitle || !heroTargetTitle || !heroSticky) return;
@@ -1963,7 +1906,7 @@
 
         titleMetrics = {
           startX: Math.max(16, (w - naturalW * sScale) * 0.5),
-          startY: Math.max(32, Math.min(h * 0.095, 86)),
+          startY: Math.max(28, Math.min(h * 0.065, 64)),
           endX: targetRect.left - stickyRect.left,
           endY: targetRect.top - stickyRect.top,
           startScale: sScale,
@@ -1979,14 +1922,14 @@
 
         const aspect = w / Math.max(1, h);
         const vFovRad = (camera.fov * Math.PI) / 180;
-        // Croissant sizing: scaled down so it fits gracefully inside the center table area without overwhelming the background
-        const desiredWorldWidth = aspect < 0.85 ? 3.10 : 4.40;
+        // Croissant sizing: perfectly balanced (not too big, not too small) resting on the table
+        const desiredWorldWidth = aspect < 0.85 ? 3.20 : 4.50;
         const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
         const camZ = Math.max(8.0, distForWidth);
         camera.position.set(0, 0.04, camZ);
         const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
-        // Position croissant squarely resting in the center foreground wooden table
-        const pivotY = aspect < 0.85 ? -halfWorldH * 0.38 : -halfWorldH * 0.32;
+        // Position croissant firmly seated on the center wooden table
+        const pivotY = aspect < 0.85 ? -halfWorldH * 0.40 : -halfWorldH * 0.36;
         pivot.position.set(0, pivotY, 0);
         measureTitleEndpoints();
       }
