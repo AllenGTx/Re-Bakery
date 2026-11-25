@@ -286,20 +286,17 @@
     }
 
     /* PC Photorealistic V-Wings: flush mojok at outer walls, anchored on open back wood completely above foreground tools */
-    /* PC backdrop composed on a 1440x900 grid, split in two halves for the scroll exit */
-    .roti-mound.roti-pc-wing {
-      filter: brightness(0.94) contrast(1.03);
-      width: 50vw;
-      bottom: 0;
-    }
-
     .roti-mound.roti-v-left {
-      left: 0;
+      left: -0.4vw;
+      width: min(55vw, 88svh);
+      bottom: clamp(134px, 18.2svh, 178px);
       transform: translate3d(0, 0, 0);
     }
 
     .roti-mound.roti-v-right {
-      right: 0;
+      right: -0.4vw;
+      width: min(50vw, 80svh);
+      bottom: clamp(134px, 18.2svh, 178px);
       transform: translate3d(0, 0, 0);
     }
 
@@ -1510,8 +1507,8 @@
           <div class="curtain-bg" id="curtainBg"></div>
           <img class="kitchen-table-layer kitchen-table-pc" id="kitchenTablePc" src="/static/assets/intro/kitchen_table_pc.webp?v=6" alt="" width="1600" height="540" decoding="async" />
           <img class="kitchen-table-layer kitchen-table-mobile" id="kitchenTableMobile" src="/static/assets/intro/kitchen_table.webp?v=2" alt="" width="1600" height="554" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_pc_left.webp?v=8" alt="" width="720" height="900" decoding="async" />
-          <img class="roti-mound roti-pc-wing roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_pc_right.webp?v=8" alt="" width="720" height="900" decoding="async" />
+          <img class="roti-mound roti-pc-wing roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.webp?v=7" alt="" width="1048" height="718" decoding="async" />
+          <img class="roti-mound roti-pc-wing roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.webp?v=7" alt="" width="883" height="658" decoding="async" />
           <img class="roti-mound roti-mobile-wing roti-mobile-left" id="rotiLeftMobile" src="/static/assets/intro/roti_mobile_left.webp?v=2" alt="" width="559" height="1080" decoding="async" />
           <img class="roti-mound roti-mobile-wing roti-mobile-right" id="rotiRightMobile" src="/static/assets/intro/roti_mobile_right.webp?v=2" alt="" width="652" height="1020" decoding="async" />
           <div class="croissant-contact-shadow" id="croissantShadow"></div>
