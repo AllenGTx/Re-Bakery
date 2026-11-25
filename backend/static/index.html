@@ -208,12 +208,12 @@
       background: var(--bg);
     }
 
-    /* Foreground Layer: Giant 3D Croissant + Roti 1/2 Mounds + Flying Re:Bakery Title */
+    /* Foreground Layer: Giant 3D Croissant + Asymmetric V-Mounds + Wooden Kitchen Table */
     .curtain-3d {
       position: absolute;
       inset: 0;
       z-index: 20;
-      background: var(--bg);
+      background: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -221,28 +221,58 @@
       transition: opacity 220ms var(--ease-out);
     }
 
+    .curtain-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      background: var(--bg);
+      pointer-events: none;
+    }
+
     .curtain-3d.is-open {
       pointer-events: none;
+    }
+
+    .kitchen-table-layer {
+      position: absolute;
+      left: 50%;
+      bottom: -2svh;
+      z-index: 15;
+      width: max(106vw, 1180px);
+      max-height: 40svh;
+      object-fit: cover;
+      object-position: center bottom;
+      transform: translate3d(-50%, 0, 0);
+      pointer-events: none;
+      opacity: 0.94;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 22%, #000 45%);
+      mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 22%, #000 45%);
+      will-change: transform, opacity;
     }
 
     .roti-mound {
       position: absolute;
       z-index: 18;
-      width: min(58vw, 88svh);
+      width: min(56vw, 84svh);
       height: auto;
-      bottom: clamp(86px, 15.5svh, 160px);
+      bottom: clamp(92px, 16svh, 165px);
       pointer-events: none;
       filter: brightness(0.92);
       will-change: transform, opacity;
     }
 
+    /* Natural asymmetry: left wing slightly larger & higher, right wing slightly lower & tighter */
     .roti-mound.roti-v-left {
-      left: -3.2vw;
+      left: -3.5vw;
+      width: min(57vw, 86svh);
+      bottom: clamp(102px, 17.5svh, 178px);
       transform: translate3d(0, 0, 0);
     }
 
     .roti-mound.roti-v-right {
-      right: -3.2vw;
+      right: -4.2vw;
+      width: min(52vw, 79svh);
+      bottom: clamp(86px, 14.5svh, 152px);
       transform: translate3d(0, 0, 0);
     }
 
@@ -316,8 +346,10 @@
 
     .tear-meter-fill {
       height: 100%;
-      width: 0%;
+      width: 100%;
       background: var(--accent-strong);
+      transform-origin: left center;
+      transform: scaleX(0);
     }
 
     /* Underlying Layer: Hero Banner revealed as Giant Croissant tears open */
@@ -514,7 +546,6 @@
     .split-word {
       display: inline-block;
       vertical-align: top;
-      will-change: transform, opacity;
     }
 
     .split-word-mask {
@@ -921,12 +952,9 @@
     }
 
     .camera-hud {
-      position: absolute;
-      left: 16px;
-      bottom: 16px;
-      max-width: min(340px, calc(100% - 32px));
+      width: 100%;
       padding: 14px 16px;
-      background: rgba(17, 17, 17, 0.92);
+      background: var(--surface-alt);
       border-radius: var(--radius-md);
       display: none;
       flex-direction: column;
@@ -1215,6 +1243,47 @@
       .catalog-sticky {
         position: static;
         order: -1;
+        scroll-margin-top: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* Splash Screen Mobile: steeper V-slope, wider separation so wings never collide */
+      .roti-mound.roti-v-left {
+        width: 56vw;
+        left: -17vw;
+        bottom: 30svh;
+      }
+
+      .roti-mound.roti-v-right {
+        width: 52vw;
+        right: -18vw;
+        bottom: 27svh;
+      }
+
+      .kitchen-table-layer {
+        width: 155vw;
+        max-height: 28svh;
+        bottom: 0;
+      }
+
+      /* Mobile Camera: smaller viewfinder box & HUD sits cleanly underneath camera */
+      .camera-stage {
+        aspect-ratio: 4 / 3;
+        max-height: 320px;
+      }
+
+      .camera-guide {
+        width: 50%;
+        max-width: 165px;
+      }
+
+      .camera-hud {
+        position: static;
+        max-width: 100%;
+        width: 100%;
+        background: var(--surface-alt);
+        padding: 14px 16px;
       }
     }
 
@@ -1358,8 +1427,8 @@
     </a>
     <nav class="topnav" aria-label="Navigasi utama">
       <a class="hide-mobile" href="#classifier">Deteksi</a>
-      <a class="hide-mobile" href="#katalog">8 Kelas</a>
-      <a class="nav-cta" href="#classifier">Mulai Uji</a>
+      <a class="hide-mobile" href="#katalog">Klasifikasi</a>
+      <a class="nav-cta" href="#classifier">Mulai Deteksi</a>
     </nav>
   </header>
 
@@ -1369,10 +1438,12 @@
         <!-- Flying Re:Bakery title: starts above Giant Croissant, glides to Hero Banner h1 on scroll -->
         <div class="flying-brand-title" id="flyingTitle" aria-hidden="true"><span class="re-accent">Re:</span>Bakery</div>
 
-        <!-- Foreground Curtain: V-Shaped Left & Right Gourmet Croissant Triangle Mounds behind Giant 3D Croissant -->
+        <!-- Foreground Curtain: Wooden Kitchen Workbench + Asymmetric V-Mounds + Giant 3D Croissant -->
         <div class="curtain-3d" id="curtain3d" aria-hidden="true">
-          <img class="roti-mound roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.png?v=11" alt="" width="932" height="707" />
-          <img class="roti-mound roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.png?v=11" alt="" width="933" height="720" />
+          <div class="curtain-bg" id="curtainBg"></div>
+          <img class="kitchen-table-layer" id="kitchenTable" src="/static/assets/intro/kitchen_table.png?v=1" alt="" width="1600" height="540" decoding="async" />
+          <img class="roti-mound roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.png?v=11" alt="" width="932" height="707" decoding="async" />
+          <img class="roti-mound roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.png?v=11" alt="" width="933" height="720" decoding="async" />
           <canvas id="croissantCanvas"></canvas>
           <div class="tear-cue" id="tearCue">
             <span id="tearCueLabel">Gulir ke bawah untuk merobek croissant</span>
@@ -1384,10 +1455,10 @@
         <div class="hero-banner-reveal" id="heroBannerReveal">
           <div class="hero-copy">
             <h1 class="hero-title is-awaiting-flight" id="heroTargetTitle"><span class="re-accent">Re:</span>Bakery</h1>
-            <p class="hero-lead">Kenali delapan jenis roti dan pastri dari foto atau kamera langsung dengan ambang batas penolakan otomatis.</p>
+            <p class="hero-lead">Kenali 8 jenis roti dan pastri favorit Anda secara instan—cukup unggah foto atau arahkan kamera secara langsung.</p>
             <div class="hero-actions">
-              <a class="btn-primary" href="#classifier">Mulai Klasifikasi</a>
-              <a class="btn-secondary" href="#katalog">Lihat 8 Kelas</a>
+              <a class="btn-primary" href="#classifier">Mulai Deteksi</a>
+              <a class="btn-secondary" href="#katalog">Jenis Klasifikasi</a>
             </div>
           </div>
 
@@ -1493,20 +1564,20 @@
           <video id="cameraVideo" autoplay playsinline muted></video>
           <div class="camera-guide" id="cameraGuide" aria-hidden="true"></div>
 
-          <div class="camera-hud" id="cameraHud">
-            <div class="camera-hud-top">
-              <span class="dot-indicator" id="hudDot"></span>
-              <span id="hudClass">Menyiapkan...</span>
-            </div>
-            <div class="bar-row">
-              <div class="bar-track"><div class="bar-fill" id="hudBar"></div></div>
-              <span class="bar-val tabular" id="hudPct">-</span>
-            </div>
-          </div>
-
           <div class="camera-idle" id="cameraIdle">
             <strong>Kamera belum aktif</strong>
             <p>Arahkan pastri ke kotak bidik persegi di tengah layar untuk prediksi berkelanjutan.</p>
+          </div>
+        </div>
+
+        <div class="camera-hud" id="cameraHud">
+          <div class="camera-hud-top">
+            <span class="dot-indicator" id="hudDot"></span>
+            <span id="hudClass">Menyiapkan...</span>
+          </div>
+          <div class="bar-row">
+            <div class="bar-track"><div class="bar-fill" id="hudBar"></div></div>
+            <span class="bar-val tabular" id="hudPct">-</span>
           </div>
         </div>
 
@@ -1558,7 +1629,7 @@
           </button>
 
           <button class="catalog-item" type="button" aria-pressed="false" data-class="Donut" data-reveal>
-            <span class="catalog-thumb"><img src="/samples/Donut.jfif" alt="Foto contoh Donut" width="960" height="720" /></span>
+            <span class="catalog-thumb"><img src="/samples/Bomboloni.jpg" alt="Foto contoh Donut" width="960" height="720" /></span>
             <span>
               <span class="catalog-name">Donut</span>
               <span class="catalog-desc">Bentuk bulat penuh berlapis cokelat atau gula tanpa lubang tengah</span>
@@ -1611,15 +1682,15 @@
       </div>
     </section>
 
-    <section class="section" aria-label="Catatan teknis penggunaan">
+    <section class="section" aria-label="Informasi model dan dataset">
       <div class="notes-grid">
         <article class="note-block" data-reveal>
-          <h3>Ambang batas dua mode</h3>
-          <p>Unggahan foto memakai ambang 32% untuk menangani foto sudut dekat dan tata letak piring. Mode kamera memakai 40% agar wajah atau ruangan kosong tidak memicu deteksi palsu.</p>
+          <h3>Model ConvNeXt-Tiny &amp; Dataset Foto Asli</h3>
+          <p>Ditenagai arsitektur deep learning ConvNeXt-Tiny dalam format ONNX yang dilatih langsung menggunakan dataset foto asli roti dan pastri dari berbagai sudut serta kondisi pencahayaan nyata.</p>
         </article>
         <article class="note-block" data-reveal>
-          <h3>Potongan persegi terpusat</h3>
-          <p>Frame kamera hanya mengirim area 1:1 di dalam kotak bidik tengah. Pastikan satu jenis roti mengisi fokus bidikan untuk meminimalkan gangguan latar belakang.</p>
+          <h3>Deteksi Instan dari Foto &amp; Kamera</h3>
+          <p>Unggah gambar dari galeri atau gunakan kamera secara langsung. Sistem menganalisis tekstur kulit, lipatan pastri, dan siluet roti untuk menampilkan hasil prediksi beserta skor keyakinannya.</p>
         </article>
       </div>
     </section>
@@ -1630,7 +1701,7 @@
       <img class="brand-mark" src="/static/assets/logo_croissant.png?v=11" alt="" width="192" height="153" />
       <span><span class="re-accent">Re:</span>Bakery</span>
     </span>
-    <span class="footer-meta">ConvNeXt-Tiny ONNX · Foto hero: Herry Wibisono (CC0), Tiia Monto (CC BY-SA 4.0), SKopp (CC BY-SA 3.0) via Wikimedia Commons</span>
+    <span class="footer-meta">ConvNeXt-Tiny ONNX · Klasifikasi Visual 8 Jenis Roti &amp; Pastri</span>
   </footer>
 
   <script type="module">
@@ -1641,6 +1712,8 @@
     const heroStage = document.getElementById("heroStage");
     const heroSticky = document.getElementById("heroSticky");
     const curtain3d = document.getElementById("curtain3d");
+    const curtainBg = document.getElementById("curtainBg");
+    const kitchenTable = document.getElementById("kitchenTable");
     const heroCanvas = document.getElementById("croissantCanvas");
     const rotiLeftFront = document.getElementById("rotiLeftFront");
     const rotiRightFront = document.getElementById("rotiRightFront");
@@ -1682,7 +1755,8 @@
         return;
       }
 
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      const isTouchOrSmall = window.innerWidth <= 768 || window.matchMedia("(pointer: coarse)").matches;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouchOrSmall ? 1.25 : 1.5));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.0;
@@ -1814,25 +1888,50 @@
       }
 
       resizeScene();
-      window.addEventListener("resize", resizeScene);
       if (document.fonts?.ready) {
         document.fonts.ready.then(measureTitleEndpoints);
+      }
+
+      let rafId = null;
+      let needsRender = true;
+      let lastCueTorn = null;
+      let lastCueHidden = null;
+      let lastOpen = null;
+      let lastClosed = null;
+      let lastDocked = null;
+      let lastLanded = null;
+
+      function scheduleFrame() {
+        needsRender = true;
+        if (rafId === null) {
+          rafId = requestAnimationFrame(animate);
+        }
       }
 
       function updateScroll() {
         const rect = heroStage.getBoundingClientRect();
         const scrollable = Math.max(1, heroStage.offsetHeight - window.innerHeight);
         const scrolled = Math.min(scrollable, Math.max(0, -rect.top));
-        targetProgress = scrolled / scrollable;
+        const nextProgress = scrolled / scrollable;
+        if (Math.abs(nextProgress - targetProgress) > 0.0001) {
+          targetProgress = nextProgress;
+          scheduleFrame();
+        }
       }
 
       window.addEventListener("scroll", updateScroll, { passive: true });
+      window.addEventListener("resize", () => {
+        resizeScene();
+        scheduleFrame();
+      });
       updateScroll();
 
       if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
         window.addEventListener("pointermove", (e) => {
+          if (currentProgress >= 0.85) return;
           ptrX = (e.clientX / window.innerWidth - 0.5) * 2;
           ptrY = (e.clientY / window.innerHeight - 0.5) * 2;
+          scheduleFrame();
         }, { passive: true });
       }
 
@@ -1859,6 +1958,7 @@
           heroCanvas.classList.add("is-ready");
           measureTitleEndpoints();
           updateScroll();
+          scheduleFrame();
         },
         undefined,
         () => {
@@ -1873,11 +1973,22 @@
       );
 
       function animate() {
-        requestAnimationFrame(animate);
+        rafId = null;
 
-        currentProgress += (targetProgress - currentProgress) * 0.11;
-        curPtrX += (ptrX - curPtrX) * 0.07;
-        curPtrY += (ptrY - curPtrY) * 0.07;
+        const dProg = targetProgress - currentProgress;
+        const dPtrX = ptrX - curPtrX;
+        const dPtrY = ptrY - curPtrY;
+
+        currentProgress += dProg * 0.14;
+        curPtrX += dPtrX * 0.08;
+        curPtrY += dPtrY * 0.08;
+
+        const settled = Math.abs(dProg) < 0.0004 && Math.abs(dPtrX) < 0.0006 && Math.abs(dPtrY) < 0.0006;
+        if (settled) {
+          currentProgress = targetProgress;
+          curPtrX = ptrX;
+          curPtrY = ptrY;
+        }
 
         const tearRaw = Math.min(1, Math.max(0, currentProgress / 0.72));
         const tearEase = tearRaw < 0.22
@@ -1887,17 +1998,27 @@
         const sideExitT = Math.min(1, Math.max(0, currentProgress / 0.50));
         const sideEase = sideExitT * sideExitT * (3 - 2 * sideExitT);
         const sideAlpha = Math.max(0, 1 - sideExitT * 1.15);
+        const isMobileView = window.innerWidth <= 768;
+        const baseTilt = isMobileView ? 14 : 0;
+
+        if (kitchenTable) {
+          const tableDrop = sideEase * (isMobileView ? 150 : 210);
+          kitchenTable.style.transform = `translate3d(-50%, ${tableDrop.toFixed(1)}px, 0)`;
+          kitchenTable.style.opacity = (sideAlpha * 0.94).toFixed(3);
+        }
 
         if (rotiLeftFront) {
           const lx = -sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
           const ly = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
-          rotiLeftFront.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${(-sideEase * 8).toFixed(2)}deg)`;
+          const rotL = baseTilt - sideEase * 8;
+          rotiLeftFront.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${rotL.toFixed(2)}deg)`;
           rotiLeftFront.style.opacity = sideAlpha.toFixed(3);
         }
         if (rotiRightFront) {
           const rx = sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
           const ry = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
-          rotiRightFront.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 8).toFixed(2)}deg)`;
+          const rotR = -baseTilt + sideEase * 8;
+          rotiRightFront.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${rotR.toFixed(2)}deg)`;
           rotiRightFront.style.opacity = sideAlpha.toFixed(3);
         }
 
@@ -1912,8 +2033,11 @@
           flyingTitle.style.transform = `translate3d(${fx.toFixed(2)}px, ${fy.toFixed(2)}px, 0) scale(${fs.toFixed(4)})`;
 
           const docked = flightT >= 0.992;
-          flyingTitle.style.opacity = docked ? "0" : "1";
-          heroTargetTitle.classList.toggle("is-awaiting-flight", !docked);
+          if (docked !== lastDocked) {
+            lastDocked = docked;
+            flyingTitle.style.opacity = docked ? "0" : "1";
+            heroTargetTitle.classList.toggle("is-awaiting-flight", !docked);
+          }
         }
 
         if (modelReady && leftHalf && rightHalf) {
@@ -1943,24 +2067,37 @@
           });
         }
 
-        if (curtain3d) {
+        if (curtainBg) {
           const bgAlpha = Math.max(0, 1 - Math.min(1, Math.max(0, (currentProgress - 0.16) / 0.34)));
-          curtain3d.style.backgroundColor = `rgba(17, 17, 17, ${bgAlpha.toFixed(3)})`;
-          const canvasAlpha = Math.max(0, 1 - Math.min(1, Math.max(0, (currentProgress - 0.60) / 0.12)));
-          curtain3d.style.opacity = canvasAlpha.toFixed(3);
-          curtain3d.classList.toggle("is-open", currentProgress > 0.42);
+          curtainBg.style.opacity = bgAlpha.toFixed(3);
         }
 
-        // Scroll cue meter & text
-        if (tearMeterFill) {
-          tearMeterFill.style.width = `${Math.min(100, Math.round(tearRaw * 100))}%`;
+        if (curtain3d) {
+          const canvasAlpha = Math.max(0, 1 - Math.min(1, Math.max(0, (currentProgress - 0.60) / 0.12)));
+          curtain3d.style.opacity = canvasAlpha.toFixed(3);
+          const isOpen = currentProgress > 0.42;
+          if (isOpen !== lastOpen) {
+            lastOpen = isOpen;
+            curtain3d.classList.toggle("is-open", isOpen);
+          }
         }
-        if (tearCueLabel) {
-          tearCueLabel.textContent = tearRaw > 0.12
+
+        // Scroll cue meter & text (composite-only scaleX + cached textContent)
+        if (tearMeterFill) {
+          tearMeterFill.style.transform = `scaleX(${Math.min(1, Math.max(0, tearRaw)).toFixed(3)})`;
+        }
+        const cueTorn = tearRaw > 0.12;
+        if (tearCueLabel && cueTorn !== lastCueTorn) {
+          lastCueTorn = cueTorn;
+          tearCueLabel.textContent = cueTorn
             ? "Croissant terobek, membuka Hero Banner..."
             : "Gulir ke bawah untuk merobek croissant";
         }
-        tearCue?.classList.toggle("is-hidden", currentProgress > 0.38);
+        const cueHidden = currentProgress > 0.38;
+        if (cueHidden !== lastCueHidden) {
+          lastCueHidden = cueHidden;
+          tearCue?.classList.toggle("is-hidden", cueHidden);
+        }
 
         // Reveal Hero Banner behind the tearing croissant
         if (heroBannerReveal) {
@@ -1971,20 +2108,31 @@
           heroBannerReveal.style.transform = `scale(${s.toFixed(4)})`;
         }
 
-        // Trigger topbar reveal & real croissants falling from top when landing on Hero Banner!
-        siteTopbar?.classList.toggle("is-curtain-closed", currentProgress < 0.42);
-        if (currentProgress >= 0.46) {
+        // Trigger topbar reveal & real croissants falling from top when landing on Hero Banner
+        const isClosed = currentProgress < 0.42;
+        if (isClosed !== lastClosed) {
+          lastClosed = isClosed;
+          siteTopbar?.classList.toggle("is-curtain-closed", isClosed);
+        }
+        if (currentProgress >= 0.46 && lastLanded !== true) {
+          lastLanded = true;
           heroRealStage?.classList.add("is-landed");
-        } else if (currentProgress < 0.12) {
+        } else if (currentProgress < 0.12 && lastLanded !== false) {
+          lastLanded = false;
           heroRealStage?.classList.remove("is-landed");
         }
 
         if (modelReady && currentProgress < 0.86) {
           renderer.render(scene, camera);
         }
+
+        needsRender = false;
+        if (!settled) {
+          rafId = requestAnimationFrame(animate);
+        }
       }
 
-      animate();
+      scheduleFrame();
     }
 
     initGiantCroissantCurtain();
@@ -1994,7 +2142,7 @@
       Baguette: "/samples/Baguette.jpg",
       Croissant: "/samples/e5c24fe86c3edf303dd5403a6577a79e3952a501.avif",
       Cromboloni: "/samples/Cromboloni.webp",
-      Donut: "/samples/Donut.jfif",
+      Donut: "/samples/Bomboloni.jpg",
       Hole_Donut: "/samples/HoleDonut.jpg",
       Pie_Susu: "/samples/PieSUSU.jfif",
       Pretzel: "/samples/Pretzel.jpg",
@@ -2357,28 +2505,39 @@
     const specimenCode = document.getElementById("specimenCode");
     const specimenDetail = document.getElementById("specimenDetail");
     const specimenFrame = specimenImg.closest(".specimen-frame");
+    const catalogSticky = specimenImg.closest(".catalog-sticky");
     let resetSpecimenDetailReveal = () => {};
     let refreshSpecimenDetailReveal = () => {};
     let replaySpecimenImage = () => {};
 
-    function activateCatalogItem(btn, index) {
+    function activateCatalogItem(btn, index, fromClick = false) {
       const cls = btn.dataset.class;
-      if (!cls || btn.getAttribute("aria-pressed") === "true") return;
-      catalogItems.forEach((el) => el.setAttribute("aria-pressed", String(el === btn)));
-      specimenImg.src = CLASS_THUMB_MAP[cls];
-      specimenImg.alt = `Pratinjau kelas ${formatLabel(cls)}`;
-      specimenTitle.textContent = formatLabel(cls);
-      specimenCode.textContent = `Kelas ${index + 1} dari 8`;
-      resetSpecimenDetailReveal();
-      specimenDetail.textContent = CATALOG_DESCRIPTIONS[cls];
-      refreshSpecimenDetailReveal();
-      replaySpecimenImage();
+      if (!cls) return;
+      const changed = btn.getAttribute("aria-pressed") !== "true";
+      if (changed) {
+        catalogItems.forEach((el) => el.setAttribute("aria-pressed", String(el === btn)));
+        specimenImg.src = CLASS_THUMB_MAP[cls];
+        specimenImg.alt = `Pratinjau kelas ${formatLabel(cls)}`;
+        specimenTitle.textContent = formatLabel(cls);
+        specimenCode.textContent = `Kelas ${index + 1} dari 8`;
+        resetSpecimenDetailReveal();
+        specimenDetail.textContent = CATALOG_DESCRIPTIONS[cls];
+        refreshSpecimenDetailReveal();
+        replaySpecimenImage();
+      }
+      if (fromClick && window.innerWidth <= 920 && catalogSticky) {
+        catalogSticky.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
 
     catalogItems.forEach((btn, idx) => {
-      btn.addEventListener("click", () => activateCatalogItem(btn, idx));
-      btn.addEventListener("mouseenter", () => activateCatalogItem(btn, idx));
-      btn.addEventListener("focus", () => activateCatalogItem(btn, idx));
+      btn.addEventListener("click", () => activateCatalogItem(btn, idx, true));
+      btn.addEventListener("mouseenter", () => {
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+          activateCatalogItem(btn, idx, false);
+        }
+      });
+      btn.addEventListener("focus", () => activateCatalogItem(btn, idx, false));
     });
 
     // GSAP SplitText + ScrollTrigger: semua teks muncul per kata saat discroll
