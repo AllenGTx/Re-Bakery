@@ -236,44 +236,73 @@
     .kitchen-table-layer {
       position: absolute;
       left: 50%;
-      bottom: -2svh;
-      z-index: 15;
-      width: max(106vw, 1180px);
-      max-height: 40svh;
+      bottom: -3svh;
+      z-index: 14;
+      width: max(108vw, 1280px);
+      height: clamp(220px, 34svh, 340px);
       object-fit: cover;
-      object-position: center bottom;
+      object-position: center 62%;
       transform: translate3d(-50%, 0, 0);
       pointer-events: none;
-      opacity: 0.94;
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 22%, #000 45%);
-      mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 22%, #000 45%);
+      opacity: 0.96;
+      filter: brightness(0.86) contrast(1.06);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.55) 18%, #000 42%);
+      mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.55) 18%, #000 42%);
+      will-change: transform, opacity;
+    }
+
+    /* Grounding contact shadow directly beneath the Giant Croissant onto the wooden workbench */
+    .croissant-contact-shadow {
+      position: absolute;
+      left: 50%;
+      bottom: clamp(92px, 16.5svh, 162px);
+      z-index: 19;
+      width: min(64vw, 760px);
+      height: clamp(44px, 7.5svh, 74px);
+      transform: translate3d(-50%, 0, 0);
+      border-radius: 50%;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(6, 4, 2, 0.86) 0%,
+        rgba(10, 6, 3, 0.62) 44%,
+        rgba(10, 6, 3, 0.20) 72%,
+        transparent 100%
+      );
+      filter: blur(10px);
+      pointer-events: none;
       will-change: transform, opacity;
     }
 
     .roti-mound {
       position: absolute;
-      z-index: 18;
+      z-index: 17;
       width: min(56vw, 84svh);
       height: auto;
-      bottom: clamp(92px, 16svh, 165px);
+      bottom: clamp(104px, 17.5svh, 178px);
       pointer-events: none;
-      filter: brightness(0.92);
+      /* Harmonize mound colors with the warm dark-studio walnut table & giant croissant */
+      filter: saturate(0.82) brightness(0.84) contrast(1.05) sepia(0.09) drop-shadow(0 18px 22px rgba(6, 4, 2, 0.78));
       will-change: transform, opacity;
     }
 
-    /* Natural asymmetry: left wing slightly larger & higher, right wing slightly lower & tighter */
+    /* Natural asymmetry on PC: wide low mountain with open valley */
     .roti-mound.roti-v-left {
       left: -3.5vw;
       width: min(57vw, 86svh);
-      bottom: clamp(102px, 17.5svh, 178px);
+      bottom: clamp(114px, 18.8svh, 190px);
       transform: translate3d(0, 0, 0);
     }
 
     .roti-mound.roti-v-right {
       right: -4.2vw;
       width: min(52vw, 79svh);
-      bottom: clamp(86px, 14.5svh, 152px);
+      bottom: clamp(98px, 16svh, 164px);
       transform: translate3d(0, 0, 0);
+    }
+
+    /* Mobile-only upper vertical stack layers to form a tall mountain / narrow valley */
+    .roti-mound.roti-upper-mobile {
+      display: none;
     }
 
     #croissantCanvas {
@@ -1248,23 +1277,55 @@
     }
 
     @media (max-width: 768px) {
-      /* Splash Screen Mobile: steeper V-slope, wider separation so wings never collide */
+      /* Splash Screen Mobile: tall vertical mountain stacks on left & right, narrow center valley, flat trays */
       .roti-mound.roti-v-left {
-        width: 56vw;
-        left: -17vw;
-        bottom: 30svh;
+        width: 58vw;
+        left: -14vw;
+        bottom: 24.5svh;
       }
 
       .roti-mound.roti-v-right {
-        width: 52vw;
-        right: -18vw;
-        bottom: 27svh;
+        width: 54vw;
+        right: -15vw;
+        bottom: 22.5svh;
+      }
+
+      .roti-mound.roti-upper-mobile {
+        display: block;
+        z-index: 16;
+      }
+
+      .roti-mound.roti-upper-left {
+        width: 48vw;
+        left: -18vw;
+        bottom: 39.5svh;
+      }
+
+      .roti-mound.roti-upper-right {
+        width: 46vw;
+        right: -19vw;
+        bottom: 37svh;
+      }
+
+      .croissant-contact-shadow {
+        width: 84vw;
+        height: 44px;
+        bottom: 26svh;
       }
 
       .kitchen-table-layer {
-        width: 155vw;
-        max-height: 28svh;
+        width: 148vw;
+        height: 29svh;
         bottom: 0;
+        object-position: center 72%;
+      }
+
+      .tear-cue {
+        bottom: 16px;
+        padding: 8px 16px;
+        gap: 6px;
+        font-size: 0.78rem;
+        white-space: nowrap;
       }
 
       /* Mobile Camera: smaller viewfinder box & HUD sits cleanly underneath camera */
@@ -1442,11 +1503,14 @@
         <div class="curtain-3d" id="curtain3d" aria-hidden="true">
           <div class="curtain-bg" id="curtainBg"></div>
           <img class="kitchen-table-layer" id="kitchenTable" src="/static/assets/intro/kitchen_table.png?v=1" alt="" width="1600" height="540" decoding="async" />
+          <img class="roti-mound roti-upper-mobile roti-upper-left" id="rotiLeftUpper" src="/static/assets/intro/roti_v_left.png?v=11" alt="" width="932" height="707" decoding="async" />
+          <img class="roti-mound roti-upper-mobile roti-upper-right" id="rotiRightUpper" src="/static/assets/intro/roti_v_right.png?v=11" alt="" width="933" height="720" decoding="async" />
           <img class="roti-mound roti-v-left" id="rotiLeftFront" src="/static/assets/intro/roti_v_left.png?v=11" alt="" width="932" height="707" decoding="async" />
           <img class="roti-mound roti-v-right" id="rotiRightFront" src="/static/assets/intro/roti_v_right.png?v=11" alt="" width="933" height="720" decoding="async" />
+          <div class="croissant-contact-shadow" id="croissantShadow"></div>
           <canvas id="croissantCanvas"></canvas>
           <div class="tear-cue" id="tearCue">
-            <span id="tearCueLabel">Gulir ke bawah untuk merobek croissant</span>
+            <span id="tearCueLabel">Gulir untuk merobek croissant</span>
             <div class="tear-meter"><div class="tear-meter-fill" id="tearMeterFill"></div></div>
           </div>
         </div>
@@ -1714,9 +1778,12 @@
     const curtain3d = document.getElementById("curtain3d");
     const curtainBg = document.getElementById("curtainBg");
     const kitchenTable = document.getElementById("kitchenTable");
+    const croissantShadow = document.getElementById("croissantShadow");
     const heroCanvas = document.getElementById("croissantCanvas");
     const rotiLeftFront = document.getElementById("rotiLeftFront");
     const rotiRightFront = document.getElementById("rotiRightFront");
+    const rotiLeftUpper = document.getElementById("rotiLeftUpper");
+    const rotiRightUpper = document.getElementById("rotiRightUpper");
     const flyingTitle = document.getElementById("flyingTitle");
     const heroTargetTitle = document.getElementById("heroTargetTitle");
     const tearCue = document.getElementById("tearCue");
@@ -1999,27 +2066,40 @@
         const sideEase = sideExitT * sideExitT * (3 - 2 * sideExitT);
         const sideAlpha = Math.max(0, 1 - sideExitT * 1.15);
         const isMobileView = window.innerWidth <= 768;
-        const baseTilt = isMobileView ? 14 : 0;
 
         if (kitchenTable) {
           const tableDrop = sideEase * (isMobileView ? 150 : 210);
           kitchenTable.style.transform = `translate3d(-50%, ${tableDrop.toFixed(1)}px, 0)`;
-          kitchenTable.style.opacity = (sideAlpha * 0.94).toFixed(3);
+          kitchenTable.style.opacity = (sideAlpha * 0.96).toFixed(3);
         }
 
+        if (croissantShadow) {
+          const shadowAlpha = Math.max(0, 1 - tearRaw * 2.2);
+          const shadowScale = 1 + tearEase * 0.25;
+          croissantShadow.style.transform = `translate3d(-50%, 0, 0) scale(${shadowScale.toFixed(3)})`;
+          croissantShadow.style.opacity = shadowAlpha.toFixed(3);
+        }
+
+        const lx = -sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
+        const ly = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
+        const rx = sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
+        const ry = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
+
         if (rotiLeftFront) {
-          const lx = -sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
-          const ly = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
-          const rotL = baseTilt - sideEase * 8;
-          rotiLeftFront.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${rotL.toFixed(2)}deg)`;
+          rotiLeftFront.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${(-sideEase * 6).toFixed(2)}deg)`;
           rotiLeftFront.style.opacity = sideAlpha.toFixed(3);
         }
         if (rotiRightFront) {
-          const rx = sideEase * (window.innerWidth * 0.62 + 260) - curPtrX * 10 * (1 - sideExitT);
-          const ry = sideEase * 14 - curPtrY * 5 * (1 - sideExitT);
-          const rotR = -baseTilt + sideEase * 8;
-          rotiRightFront.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${rotR.toFixed(2)}deg)`;
+          rotiRightFront.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 6).toFixed(2)}deg)`;
           rotiRightFront.style.opacity = sideAlpha.toFixed(3);
+        }
+        if (isMobileView && rotiLeftUpper) {
+          rotiLeftUpper.style.transform = `translate3d(${(lx * 1.12).toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${(-sideEase * 8).toFixed(2)}deg)`;
+          rotiLeftUpper.style.opacity = sideAlpha.toFixed(3);
+        }
+        if (isMobileView && rotiRightUpper) {
+          rotiRightUpper.style.transform = `translate3d(${(rx * 1.12).toFixed(1)}px, ${ry.toFixed(1)}px, 0) rotate(${(sideEase * 8).toFixed(2)}deg)`;
+          rotiRightUpper.style.opacity = sideAlpha.toFixed(3);
         }
 
         if (flyingTitle && heroTargetTitle) {
@@ -2091,7 +2171,7 @@
           lastCueTorn = cueTorn;
           tearCueLabel.textContent = cueTorn
             ? "Croissant terobek, membuka Hero Banner..."
-            : "Gulir ke bawah untuk merobek croissant";
+            : "Gulir untuk merobek croissant";
         }
         const cueHidden = currentProgress > 0.38;
         if (cueHidden !== lastCueHidden) {
