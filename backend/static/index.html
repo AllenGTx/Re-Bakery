@@ -258,10 +258,10 @@
     .croissant-contact-shadow {
       position: absolute;
       left: 50%;
-      bottom: clamp(100px, 13.5svh, 140px);
+      bottom: clamp(100px, 14.5svh, 150px);
       z-index: 21;
-      width: min(42vw, 560px);
-      height: clamp(38px, 5.5svh, 54px);
+      width: min(34vw, 440px);
+      height: clamp(30px, 4.5svh, 44px);
       transform: translate3d(-50%, 0, 0);
       border-radius: 50%;
       background: radial-gradient(
@@ -313,17 +313,16 @@
       display: none;
     }
 
-    /* Unified Photorealistic Bakery Backdrop (Table + Mounds + Stands) */
+    /* Unified Photorealistic Bakery Backdrop (Full edge-to-edge coverage, no empty sides) */
     .splash-unified-backdrop {
       position: absolute;
       left: 50%;
       bottom: 0;
       width: 100vw;
-      min-width: 1140px;
-      max-width: 1920px;
-      height: 94svh;
-      max-height: 1080px;
-      object-fit: contain;
+      min-width: 100vw;
+      height: 100svh;
+      max-height: 100svh;
+      object-fit: cover;
       object-position: center bottom;
       transform: translate3d(-50%, 0, 0);
       z-index: 16;
@@ -335,10 +334,9 @@
 
     @media (max-width: 768px) {
       .splash-unified-backdrop {
-        width: 155vw;
+        width: 100vw;
         min-width: 0;
-        max-width: none;
-        height: 75svh;
+        height: 80svh;
         object-fit: cover;
         object-position: center bottom;
       }
@@ -1345,9 +1343,9 @@
       }
 
       .croissant-contact-shadow {
-        width: 82vw;
-        height: 40px;
-        bottom: 14.5svh;
+        width: 72vw;
+        height: 36px;
+        bottom: 16svh;
       }
 
       .kitchen-table-pc {
@@ -1981,14 +1979,14 @@
 
         const aspect = w / Math.max(1, h);
         const vFovRad = (camera.fov * Math.PI) / 180;
-        // Croissant sizing: tuned so it sits harmoniously inside the central valley of the new bakery backdrop
-        const desiredWorldWidth = aspect < 0.85 ? 3.65 : 5.75;
+        // Croissant sizing: scaled down so it fits gracefully inside the center table area without overwhelming the background
+        const desiredWorldWidth = aspect < 0.85 ? 3.10 : 4.40;
         const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
         const camZ = Math.max(8.0, distForWidth);
         camera.position.set(0, 0.04, camZ);
         const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
-        // Position croissant firmly seated on the center wooden tabletop
-        const pivotY = aspect < 0.85 ? -halfWorldH * 0.44 : -halfWorldH * 0.35;
+        // Position croissant squarely resting in the center foreground wooden table
+        const pivotY = aspect < 0.85 ? -halfWorldH * 0.38 : -halfWorldH * 0.32;
         pivot.position.set(0, pivotY, 0);
         measureTitleEndpoints();
       }
