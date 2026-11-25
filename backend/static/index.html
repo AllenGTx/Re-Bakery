@@ -298,11 +298,12 @@
     }
 
     @media (max-width: 768px) {
-      .splash-unified-backdrop {
+      /* Mobile Design 1: Vertikal V-Wings + Meja Kayu Peralatan Lengkap */
+      html.mobile-design-1 .splash-unified-backdrop {
         display: none !important;
       }
 
-      .kitchen-table-layer {
+      html.mobile-design-1 .kitchen-table-layer {
         display: block;
         min-width: 0;
         width: 118vw;
@@ -313,12 +314,12 @@
         transform: translate3d(-50%, 0, 0);
       }
 
-      .roti-mound.roti-mobile-wing {
+      html.mobile-design-1 .roti-mound.roti-mobile-wing {
         display: block;
         z-index: 17;
       }
 
-      .roti-mound.roti-mobile-left {
+      html.mobile-design-1 .roti-mound.roti-mobile-left {
         left: -2vw;
         bottom: 19.5svh;
         width: 56vw;
@@ -327,7 +328,7 @@
         object-position: left bottom;
       }
 
-      .roti-mound.roti-mobile-right {
+      html.mobile-design-1 .roti-mound.roti-mobile-right {
         right: -2vw;
         bottom: 19.5svh;
         width: 58vw;
@@ -336,11 +337,33 @@
         object-position: right bottom;
       }
 
-      .croissant-contact-shadow {
+      html.mobile-design-1 .croissant-contact-shadow {
         left: 50% !important;
         width: 88vw !important;
         height: 46px !important;
         bottom: 17.5svh !important;
+      }
+
+      /* Mobile Design 2: Unified Backdrop Roti Ramai dengan Croissant di Tengah Persis */
+      html.mobile-design-2 .kitchen-table-layer,
+      html.mobile-design-2 .roti-mound.roti-mobile-wing {
+        display: none !important;
+      }
+
+      html.mobile-design-2 .splash-unified-backdrop {
+        display: block !important;
+        width: 100vw;
+        max-width: none;
+        height: 72svh;
+        object-fit: contain;
+        object-position: center bottom;
+      }
+
+      html.mobile-design-2 .croissant-contact-shadow {
+        left: 50% !important;
+        width: 68vw !important;
+        height: 34px !important;
+        bottom: calc(50svh - 90px) !important;
       }
     }
 
@@ -1317,50 +1340,6 @@
     }
 
     @media (max-width: 768px) {
-      /* Hide wide PC wings on mobile; show tall portrait V-wings matching Red & Yellow lines (78582c2) */
-      .roti-mound.roti-pc-wing {
-        display: none;
-      }
-
-      .roti-mound.roti-mobile-wing {
-        display: block;
-        z-index: 17;
-      }
-
-      .roti-mound.roti-mobile-left {
-        left: -2vw;
-        bottom: 19.5svh;
-        width: 56vw;
-        max-height: 58svh;
-        object-fit: contain;
-        object-position: left bottom;
-      }
-
-      .roti-mound.roti-mobile-right {
-        right: -2vw;
-        bottom: 19.5svh;
-        width: 58vw;
-        max-height: 55svh;
-        object-fit: contain;
-        object-position: right bottom;
-      }
-
-      .croissant-contact-shadow {
-        left: 50%;
-        width: 88vw;
-        height: 46px;
-        bottom: 17.5svh;
-      }
-
-      .kitchen-table-layer {
-        display: block;
-        min-width: 0;
-        width: 118vw;
-        height: 26svh;
-        bottom: 0;
-        object-position: center bottom;
-      }
-
       .tear-cue {
         bottom: 16px;
         padding: 8px 16px;
@@ -1811,6 +1790,12 @@
     import * as THREE from "three";
     import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
+    // RNG 50:50 Pick between Mobile Design 1 and Mobile Design 2 on refresh
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceMobileDesign = urlParams.get("mobileDesign"); // allows ?mobileDesign=1 or ?mobileDesign=2 for testing
+    const mobileDesignChoice = forceMobileDesign ? parseInt(forceMobileDesign, 10) : (Math.random() < 0.5 ? 1 : 2);
+    document.documentElement.classList.add(mobileDesignChoice === 1 ? "mobile-design-1" : "mobile-design-2");
+
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const heroStage = document.getElementById("heroStage");
     const heroSticky = document.getElementById("heroSticky");
@@ -1987,15 +1972,27 @@
         const vFovRad = (camera.fov * Math.PI) / 180;
         
         if (aspect < 0.85) {
-          // Versi Mobile / HP: Revert exact configuration as approved in 78582c2
-          // (desiredWorldWidth 4.10, camZ calculated, pivot.scale 1.0, pivotY = -halfWorldH * 0.39)
-          const desiredWorldWidth = 4.10;
-          const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
-          const camZ = Math.max(6.45, distForWidth);
-          camera.position.set(0, 0.04, camZ);
-          const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
-          pivot.scale.setScalar(1.0);
-          pivot.position.set(0, -halfWorldH * 0.39, 0);
+          if (mobileDesignChoice === 1) {
+            // Mobile Design 1: Vertikal V-Wings + Meja Kayu Peralatan Lengkap (78582c2)
+            const desiredWorldWidth = 4.10;
+            const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
+            const camZ = Math.max(6.45, distForWidth);
+            camera.position.set(0, 0.04, camZ);
+            const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
+            pivot.scale.setScalar(1.0);
+            pivot.position.set(0, -halfWorldH * 0.39, 0);
+          } else {
+            // Mobile Design 2: Unified Backdrop Roti Ramai dengan Croissant di Tengah X dan Y Persis
+            const camZ = 8.0;
+            camera.position.set(0, 0.04, camZ);
+            const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
+            const halfWorldW = halfWorldH * aspect;
+            // Fit naturally in viewport without being too huge or too small
+            const baseScale = Math.min(0.68, (halfWorldW * 2 * 0.65) / 4.02);
+            pivot.scale.setScalar(baseScale);
+            // Center persis X=0 dan Y=0
+            pivot.position.set(0, 0, 0);
+          }
         } else {
           // Versi PC / Desktop:
           // camZ 8.0, pivot scale 0.70 (70% size)
@@ -2125,9 +2122,9 @@
         const sideAlpha = Math.max(0, 1 - sideExitT * 1.15);
         const isMobileView = window.innerWidth <= 768;
 
-        // On PC: Splash backdrop slides downwards on scroll
-        // On Mobile: Kitchen table drops, and mobile V-wings separate cleanly outward (78582c2)
-        if (isMobileView) {
+        // On PC & Mobile Design 2: Splash backdrop slides downwards on scroll
+        // On Mobile Design 1: Kitchen table drops, and mobile V-wings separate cleanly outward (78582c2)
+        if (isMobileView && mobileDesignChoice === 1) {
           if (kitchenTable) {
             const tableDrop = sideEase * 150;
             kitchenTable.style.transform = `translate3d(-50%, ${tableDrop.toFixed(1)}px, 0)`;
@@ -2147,7 +2144,7 @@
           }
         } else {
           if (splashBackdrop) {
-            const dropY = sideEase * 380 + curPtrY * 6 * (1 - sideExitT);
+            const dropY = sideEase * (isMobileView ? 280 : 380) + curPtrY * 6 * (1 - sideExitT);
             splashBackdrop.style.transform = `translate3d(-50%, ${dropY.toFixed(1)}px, 0)`;
             splashBackdrop.style.opacity = sideAlpha.toFixed(3);
           }
@@ -2156,7 +2153,7 @@
         if (croissantShadow) {
           const shadowAlpha = Math.max(0, 1 - tearRaw * 2.2);
           const shadowScale = 1 + tearEase * 0.25;
-          const shadowDrop = isMobileView ? 0 : sideEase * 220;
+          const shadowDrop = (isMobileView && mobileDesignChoice === 1) ? 0 : sideEase * 220;
           croissantShadow.style.transform = `translate3d(-50%, ${shadowDrop.toFixed(1)}px, 0) scale(${shadowScale.toFixed(3)})`;
           croissantShadow.style.opacity = shadowAlpha.toFixed(3);
         }
