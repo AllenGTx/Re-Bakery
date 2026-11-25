@@ -361,9 +361,9 @@
 
       html.mobile-design-2 .croissant-contact-shadow {
         left: 50% !important;
-        width: 68vw !important;
-        height: 34px !important;
-        bottom: calc(50svh - 90px) !important;
+        width: 78vw !important;
+        height: 38px !important;
+        bottom: calc(50svh - 90px + 10px) !important;
       }
     }
 
@@ -1983,15 +1983,17 @@
             pivot.position.set(0, -halfWorldH * 0.39, 0);
           } else {
             // Mobile Design 2: Unified Backdrop Roti Ramai dengan Croissant di Tengah X dan Y Persis
+            // Ukuran digedein 20% (0.65 * 1.20 = 0.78), dan posisi Y naik ~10px
             const camZ = 8.0;
             camera.position.set(0, 0.04, camZ);
             const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
             const halfWorldW = halfWorldH * aspect;
-            // Fit naturally in viewport without being too huge or too small
-            const baseScale = Math.min(0.68, (halfWorldW * 2 * 0.65) / 4.02);
+            // Scale +20%
+            const baseScale = Math.min(0.82, (halfWorldW * 2 * 0.78) / 4.02);
             pivot.scale.setScalar(baseScale);
-            // Center persis X=0 dan Y=0
-            pivot.position.set(0, 0, 0);
+            // Center X=0, Y naik ~10px (+0.044 world units)
+            const shiftY10px = (2 * halfWorldH / Math.max(1, h)) * 10;
+            pivot.position.set(0, shiftY10px, 0);
           }
         } else {
           // Versi PC / Desktop:
