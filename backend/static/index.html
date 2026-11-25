@@ -239,8 +239,8 @@
       left: 50%;
       bottom: clamp(48px, 6.8svh, 75px);
       z-index: 21;
-      width: min(22vw, 270px);
-      height: clamp(20px, 2.8svh, 28px);
+      width: min(16vw, 190px);
+      height: clamp(16px, 2.2svh, 22px);
       transform: translate3d(-50%, 0, 0);
       border-radius: 50%;
       background: radial-gradient(
@@ -1922,14 +1922,19 @@
 
         const aspect = w / Math.max(1, h);
         const vFovRad = (camera.fov * Math.PI) / 180;
-        // Croissant sizing: compact & refined so all the background pastries, macarons, and bombolonis are clearly visible
-        const desiredWorldWidth = aspect < 0.85 ? 2.30 : 2.75;
-        const distForWidth = desiredWorldWidth / (2 * Math.tan(vFovRad * 0.5) * Math.max(0.42, aspect));
-        const camZ = Math.max(8.0, distForWidth);
+        // On desktop, camZ 8.0 with pivot scale 0.70 gives an elegant, proportioned croissant
+        // On mobile (aspect < 0.85), fit croissant cleanly within ~65% of viewport width
+        const camZ = 8.0;
         camera.position.set(0, 0.04, camZ);
         const halfWorldH = camZ * Math.tan(vFovRad * 0.5);
+        const halfWorldW = halfWorldH * aspect;
+        
+        // Scale pivot directly: 70% scale for desktop, and fit to width for mobile
+        const baseScale = aspect < 0.85 ? Math.min(0.68, (halfWorldW * 2 * 0.62) / 4.02) : 0.70;
+        pivot.scale.setScalar(baseScale);
+
         // Position croissant grounded on the front wooden table plane
-        const pivotY = aspect < 0.85 ? -halfWorldH * 0.46 : -halfWorldH * 0.42;
+        const pivotY = aspect < 0.85 ? -halfWorldH * 0.42 : -halfWorldH * 0.42;
         pivot.position.set(0, pivotY, 0);
         measureTitleEndpoints();
       }
